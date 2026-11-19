@@ -1,0 +1,1884 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ôn tập CTDL&amp;GT — Hướng dẫn trọng tâm và bài mẫu bằng ngôn ngữ C</title>
+<style>
+:root {
+  --bg:#0d1117; --surface:#161b22; --surface2:#1c2128; --border:#30363d;
+  --acc1:#58a6ff; --acc2:#bc8cff; --acc3:#3fb950; --acc4:#d29922; --acc5:#f85149;
+  --text:#c9d1d9; --muted:#8b949e; --code-bg:#010409;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:14.5px;line-height:1.75}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:200;background:rgba(13,17,23,.97);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.logo{font-weight:800;font-size:15px;color:var(--acc1);white-space:nowrap;margin-right:8px}
+nav a{color:var(--muted);text-decoration:none;font-size:12.5px;padding:4px 10px;border-radius:6px;transition:.2s;white-space:nowrap}
+nav a:hover{background:var(--surface2);color:var(--text)}
+
+/* LAYOUT */
+.wrap{max-width:1020px;margin:0 auto;padding:28px 18px 80px}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#161b22,#1a2030);border:1px solid var(--border);border-radius:14px;padding:36px 32px;margin-bottom:36px;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;top:-80px;right:-80px;width:260px;height:260px;background:radial-gradient(circle,rgba(88,166,255,.12) 0%,transparent 65%);pointer-events:none}
+.hero h1{font-size:26px;font-weight:800;margin-bottom:8px}
+.hero h1 em{color:var(--acc1);font-style:normal}
+.hero p{color:var(--muted);max-width:620px;font-size:14px}
+.badges{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.badge{display:inline-flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px 11px;font-size:11.5px;color:var(--muted)}
+
+/* SECTION HEADER */
+.sec{display:flex;align-items:center;gap:14px;margin:44px 0 20px;padding-bottom:14px;border-bottom:2px solid var(--border)}
+.secn{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;flex-shrink:0}
+.s1{background:rgba(88,166,255,.15);color:var(--acc1);border:1px solid rgba(88,166,255,.35)}
+.s2{background:rgba(188,140,255,.15);color:var(--acc2);border:1px solid rgba(188,140,255,.35)}
+.s3{background:rgba(63,185,80,.15);color:var(--acc3);border:1px solid rgba(63,185,80,.35)}
+.s4{background:rgba(210,153,34,.15);color:var(--acc4);border:1px solid rgba(210,153,34,.35)}
+.sec h2{font-size:21px;font-weight:700}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:18px}
+.card-h{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px}
+.qn{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:2px 9px;font-size:11.5px;color:var(--muted);font-weight:700;white-space:nowrap;margin-top:3px}
+.card h3{font-size:15px;font-weight:600}
+
+/* CODE */
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:10px;padding:16px 18px;overflow-x:auto;font-size:12.5px;line-height:1.65;margin:10px 0;font-family:'Cascadia Code','Consolas','Courier New',monospace;tab-size:4}
+.kw{color:#ff7b72}.fn{color:#d2a8ff}.cm{color:#8b949e;font-style:italic}.str{color:#a5d6ff}.num{color:#79c0ff}.ty{color:#ffa657}.pp{color:#79c0ff}.op{color:#ff7b72}
+
+/* TABLE */
+.tw{overflow-x:auto;margin:10px 0}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--surface2);color:var(--acc1);padding:9px 11px;text-align:center;font-weight:600;border:1px solid var(--border)}
+td{padding:8px 11px;border:1px solid var(--border);text-align:center}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+.tl{text-align:left}.hl{color:var(--acc4);font-weight:600}.gr{color:var(--acc3);font-weight:600}.rd{color:var(--acc5)}
+
+/* ALERTS */
+.note{background:#0d2137;border-left:3px solid var(--acc1);border-radius:0 8px 8px 0;padding:11px 15px;margin:10px 0;font-size:13.5px}
+.warn{background:#1d1a0a;border-left:3px solid var(--acc4);border-radius:0 8px 8px 0;padding:11px 15px;margin:10px 0;font-size:13.5px}
+.err{background:#1d0a0a;border-left:3px solid var(--acc5);border-radius:0 8px 8px 0;padding:11px 15px;margin:10px 0;font-size:13.5px}
+.note b,.warn b,.err b{display:block;margin-bottom:3px;font-size:12.5px}
+
+/* STEPS */
+.steps{list-style:none;counter-reset:st}
+.steps li{counter-increment:st;padding:9px 10px 9px 42px;margin-bottom:7px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;position:relative;font-size:13.5px}
+.steps li::before{content:counter(st);position:absolute;left:11px;top:50%;transform:translateY(-50%);width:21px;height:21px;border-radius:50%;background:var(--acc1);color:#000;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800}
+
+/* TREE */
+.tree{background:var(--code-bg);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin:10px 0;font-family:'Cascadia Code','Consolas',monospace;font-size:12.5px;line-height:1.9;overflow-x:auto;white-space:pre;color:#c9d1d9}
+.rl{display:inline-block;background:rgba(210,153,34,.15);border:1px solid rgba(210,153,34,.4);color:var(--acc4);border-radius:5px;padding:1px 7px;font-size:11px;font-weight:700}
+
+/* MISC */
+.p{color:var(--text);margin:7px 0;font-size:13.5px}
+h4{font-size:13.5px;font-weight:700;color:var(--acc1);margin:13px 0 6px}
+.tag{display:inline-block;background:rgba(88,166,255,.12);color:var(--acc1);border-radius:4px;padding:1px 7px;font-size:11px;font-weight:700;margin-right:4px}
+.tag2{background:rgba(63,185,80,.12);color:var(--acc3)}
+.tag3{background:rgba(210,153,34,.12);color:var(--acc4)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+.sub{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px}
+.div{height:1px;background:var(--border);margin:30px 0}
+ul.ul{padding-left:20px}
+ul.ul li{padding:3px 0;font-size:13.5px}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">📚 CTDL&amp;GT — C Language</div>
+  <a href="#dslk">§1 Linked List</a>
+  <a href="#stack">§2 Stack</a>
+  <a href="#avl">§3 AVL Tree</a>
+  <a href="#hash">§4 Hash Table</a>
+  <a href="#paper-exam">Mẫu giấy thi</a>
+  <a href="#full-exam">Đề mẫu đủ</a>
+  <a href="#source">Nguồn</a>
+  <a href="#note">⚠ Ghi chú</a>
+</nav>
+
+<div class="wrap">
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Ôn tập CTDL&amp;GT — <em>Hướng dẫn trọng tâm và bài mẫu bằng ngôn ngữ C</em></h1>
+  <p>Tài liệu hướng dẫn sinh viên ôn tập cuối kỳ theo 4 nhóm câu hỏi: DSLK đơn, Stack/Queue, BST/AVL và Bảng băm. Toàn bộ code dùng <strong>ngôn ngữ C thuần</strong>: <code>malloc/free</code>, con trỏ, <code>typedef struct</code>, không dùng <code>new/delete</code>, không dùng tham chiếu kiểu C++.</p>
+  <div class="badges">
+    <span class="badge">🌐 Ngôn ngữ C (không phải C++)</span>
+    <span class="badge">⏱ 75 phút thi</span>
+    <span class="badge">📝 4 câu × 2.5đ</span>
+    <span class="badge">📖 Nguồn chính: Giáo trình TVThọ 2019</span>
+  </div>
+</div>
+
+<div id="source" class="card" style="border-color:rgba(88,166,255,.35);background:rgba(88,166,255,.04)">
+  <div class="card-h"><span class="qn">Nguồn</span><h3>Phạm vi tài liệu và quy ước sử dụng</h3></div>
+  <ul class="ul">
+    <li><b>Nội dung lấy từ giáo trình:</b> khái niệm, cấu trúc SNode/SList, Stack/Queue, BST/AVL, Hash Table, các thao tác nền và phương pháp xử lý va chạm.</li>
+    <li><b>Nội dung mở rộng theo đề ôn tập:</b> các bài mẫu tính toán trên DSLK, biểu thức Stack cụ thể, dãy vẽ AVL, bài Hash Table theo bộ dữ liệu cụ thể, Double Hashing và các ví dụ ứng dụng thực tế.</li>
+    <li><b>Quy ước bắt buộc:</b> tất cả lời giải lập trình viết bằng <b>C thuần</b>. Nếu gặp mẫu có cú pháp tham chiếu kiểu C++ trong tài liệu tham khảo, phải quy đổi sang con trỏ hoặc con trỏ cấp 2.</li>
+  </ul>
+</div>
+
+<!-- ======================================================= -->
+<!-- § 1: DANH SÁCH LIÊN KẾT ĐƠN -->
+<!-- ======================================================= -->
+<div id="dslk" class="sec">
+  <div class="secn s1">1</div>
+  <div><h2>Danh sách liên kết đơn (Singly Linked List)</h2>
+  <span class="tag">SNode</span><span class="tag">SList</span><span class="tag tag2">Ngôn ngữ C</span></div>
+</div>
+
+<!-- Khai báo cơ bản -->
+<div class="card">
+  <div class="card-h"><span class="qn">Cơ sở</span><h3>Khai báo SNode, SList và các thao tác nền — C thuần (theo tr. 97–109 GT Thầy Thọ)</h3></div>
+<pre><code><span class="pp">#include &lt;stdio.h&gt;</span>
+<span class="pp">#include &lt;stdlib.h&gt;</span>   <span class="cm">/* malloc, free */</span>
+<span class="pp">#include &lt;math.h&gt;</span>     <span class="cm">/* sqrt, pow — dùng khi cần kiểm tra số đặc biệt */</span>
+<span class="pp">#include &lt;string.h&gt;</span>
+
+<span class="cm">/* ---- Kiểu ItemType: có thể thay bằng float, struct SINHVIEN, v.v. ---- */</span>
+<span class="kw">typedef int</span> <span class="ty">ItemType</span>;
+
+<span class="cm">/* ---- Cấu trúc một nút trong DSLK đơn ---- */</span>
+<span class="kw">typedef struct</span> <span class="ty">SNode</span> {
+    <span class="ty">ItemType</span>      Info;   <span class="cm">/* dữ liệu của nút */</span>
+    <span class="kw">struct</span> <span class="ty">SNode</span>* Next;   <span class="cm">/* con trỏ đến nút kế sau (NULL nếu cuối) */</span>
+} <span class="ty">SNode</span>;
+
+<span class="cm">/* ---- Cấu trúc quản lý toàn danh sách ---- */</span>
+<span class="kw">typedef struct</span> {
+    <span class="ty">SNode</span>* Head;   <span class="cm">/* địa chỉ nút đầu */</span>
+    <span class="ty">SNode</span>* Tail;   <span class="cm">/* địa chỉ nút cuối */</span>
+} <span class="ty">SList</span>;
+
+<span class="cm">/* ========== CÁC HÀM NỀN ========== */</span>
+
+<span class="cm">/* Tạo nút mới chứa giá trị x */</span>
+<span class="ty">SNode</span>* <span class="fn">createSNode</span>(<span class="ty">ItemType</span> x) {
+    <span class="ty">SNode</span>* p = (<span class="ty">SNode</span>*)<span class="fn">malloc</span>(<span class="kw">sizeof</span>(<span class="ty">SNode</span>));
+    <span class="kw">if</span> (p == <span class="kw">NULL</span>) { <span class="fn">printf</span>(<span class="str">"Khong du bo nho!\n"</span>); <span class="kw">return NULL</span>; }
+    p->Info = x;
+    p->Next = <span class="kw">NULL</span>;
+    <span class="kw">return</span> p;
+}
+
+<span class="cm">/* Khởi tạo danh sách rỗng */</span>
+<span class="kw">void</span> <span class="fn">initSList</span>(<span class="ty">SList</span>* sl) { sl->Head = sl->Tail = <span class="kw">NULL</span>; }
+
+<span class="cm">/* Kiểm tra danh sách rỗng: trả về 1 nếu rỗng, 0 nếu không */</span>
+<span class="kw">int</span> <span class="fn">isEmpty</span>(<span class="ty">SList</span> sl) { <span class="kw">return</span> (sl.Head == <span class="kw">NULL</span>) ? <span class="num">1</span> : <span class="num">0</span>; }
+
+<span class="cm">/* Thêm nút p vào cuối danh sách */</span>
+<span class="kw">int</span> <span class="fn">insertTail</span>(<span class="ty">SList</span>* sl, <span class="ty">SNode</span>* p) {
+    <span class="kw">if</span> (p == <span class="kw">NULL</span>) <span class="kw">return</span> <span class="num">0</span>;
+    <span class="kw">if</span> (<span class="fn">isEmpty</span>(*sl)) { sl->Head = sl->Tail = p; }
+    <span class="kw">else</span> { sl->Tail->Next = p; sl->Tail = p; }
+    <span class="kw">return</span> <span class="num">1</span>;
+}
+
+<span class="cm">/* In toàn bộ danh sách */</span>
+<span class="kw">void</span> <span class="fn">showSList</span>(<span class="ty">SList</span> sl) {
+    <span class="ty">SNode</span>* p = sl.Head;
+    <span class="kw">while</span> (p != <span class="kw">NULL</span>) { <span class="fn">printf</span>(<span class="str">"%d "</span>, p->Info); p = p->Next; }
+    <span class="fn">printf</span>(<span class="str">"\n"</span>);
+}
+
+<span class="cm">/* Hủy toàn bộ danh sách, giải phóng bộ nhớ */</span>
+<span class="kw">void</span> <span class="fn">deleteSList</span>(<span class="ty">SList</span>* sl) {
+    <span class="kw">while</span> (sl->Head != <span class="kw">NULL</span>) {
+        <span class="ty">SNode</span>* p = sl->Head;
+        sl->Head = sl->Head->Next;
+        <span class="fn">free</span>(p);
+    }
+    sl->Tail = <span class="kw">NULL</span>;
+}</code></pre>
+  <div class="warn"><b>⚠ Quy ước C thuần: malloc/free, không dùng new/delete</b>
+  Trong bài làm bằng C, dùng <code>malloc(sizeof(SNode))</code> và <code>free(p)</code>. Hàm nhận con trỏ đến SList (<code>SList*</code>) khi cần sửa, không dùng tham chiếu kiểu C++.</div>
+</div>
+
+<!-- 1.1 Bài đếm/tổng đơn giản -->
+<div class="card">
+  <div class="card-h"><span class="qn">Câu 1a</span><h3>Hàm thống kê đơn giản: đếm số chẵn, tính tổng, trung bình cộng (CLO2 — 4 ý × 0.25đ)</h3></div>
+<pre><code><span class="cm">/* 1. Đếm số phần tử chẵn trong DSLK */</span>
+<span class="kw">int</span> <span class="fn">demSoChan</span>(<span class="ty">SList</span> sl) {
+    <span class="kw">int</span> dem = <span class="num">0</span>;
+    <span class="ty">SNode</span>* p = sl.Head;
+    <span class="kw">while</span> (p != <span class="kw">NULL</span>) {
+        <span class="kw">if</span> (p->Info % <span class="num">2</span> == <span class="num">0</span>) dem++;
+        p = p->Next;
+    }
+    <span class="kw">return</span> dem;
+}
+
+<span class="cm">/* 2. Đếm phần tử trong khoảng [a, b] */</span>
+<span class="kw">int</span> <span class="fn">demTrongKhoang</span>(<span class="ty">SList</span> sl, <span class="kw">int</span> a, <span class="kw">int</span> b) {
+    <span class="kw">int</span> dem = <span class="num">0</span>;
+    <span class="ty">SNode</span>* p = sl.Head;
+    <span class="kw">while</span> (p != <span class="kw">NULL</span>) {
+        <span class="kw">if</span> (p->Info >= a && p->Info <= b) dem++;
+        p = p->Next;
+    }
+    <span class="kw">return</span> dem;
+}
+
+<span class="cm">/* 3. Tính tổng các phần tử chia hết cho k */</span>
+<span class="kw">long</span> <span class="fn">tongChiaHetChoK</span>(<span class="ty">SList</span> sl, <span class="kw">int</span> k) {
+    <span class="kw">long</span> tong = <span class="num">0</span>;
+    <span class="ty">SNode</span>* p = sl.Head;
+    <span class="kw">while</span> (p != <span class="kw">NULL</span>) {
+        <span class="kw">if</span> (k != <span class="num">0</span> && p->Info % k == <span class="num">0</span>) tong += p->Info;
+        p = p->Next;
+    }
+    <span class="kw">return</span> tong;
+}
+
+<span class="cm">/* 4. Trung bình cộng các phần tử có giá trị lớn hơn 10 */</span>
+<span class="kw">float</span> <span class="fn">tbLonHon10</span>(<span class="ty">SList</span> sl) {
+    <span class="kw">long</span>  tong = <span class="num">0</span>;
+    <span class="kw">int</span>   dem  = <span class="num">0</span>;
+    <span class="ty">SNode</span>* p = sl.Head;
+    <span class="kw">while</span> (p != <span class="kw">NULL</span>) {
+        <span class="kw">if</span> (p->Info > <span class="num">10</span>) { tong += p->Info; dem++; }
+        p = p->Next;
+    }
+    <span class="kw">return</span> (dem > <span class="num">0</span>) ? (<span class="kw">float</span>)tong / dem : <span class="num">0.0f</span>;
+}</code></pre>
+</div>
+
+<!-- 1.2 Hàm phụ trợ + đặc biệt -->
+<div class="card">
+  <div class="card-h"><span class="qn">Câu 1b</span><h3>Hàm kiểm tra phụ trợ + Đếm số đặc biệt trên DSLK (CLO1 — 6 ý × 0.25đ)</h3></div>
+<pre><code><span class="cm">/* ===== HÀM KIỂM TRA PHỤ TRỢ — viết độc lập, gọi lại trong hàm chính ===== */</span>
+
+<span class="cm">/* Kiểm tra số nguyên tố: trả về 1 nếu là số nguyên tố */</span>
+<span class="kw">int</span> <span class="fn">isNguyenTo</span>(<span class="kw">int</span> n) {
+    <span class="kw">int</span> i;
+    <span class="kw">if</span> (n < <span class="num">2</span>) <span class="kw">return</span> <span class="num">0</span>;
+    <span class="kw">for</span> (i = <span class="num">2</span>; i * i <= n; i++)
+        <span class="kw">if</span> (n % i == <span class="num">0</span>) <span class="kw">return</span> <span class="num">0</span>;
+    <span class="kw">return</span> <span class="num">1</span>;
+}
+
+<span class="cm">/* Kiểm tra số hoàn thiện: tổng các ước thực sự = n (VD: 6=1+2+3, 28=1+2+4+7+14) */</span>
+<span class="kw">int</span> <span class="fn">isHoanThien</span>(<span class="kw">int</span> n) {
+    <span class="kw">int</span> i, tong = <span class="num">1</span>;
+    <span class="kw">if</span> (n < <span class="num">2</span>) <span class="kw">return</span> <span class="num">0</span>;
+    <span class="kw">for</span> (i = <span class="num">2</span>; i * i <= n; i++) {
+        <span class="kw">if</span> (n % i == <span class="num">0</span>) {
+            tong += i;
+            <span class="kw">if</span> (i != n / i) tong += n / i;
+        }
+    }
+    <span class="kw">return</span> (tong == n);
+}
+
+<span class="cm">/* Kiểm tra số chính phương: căn bậc 2 là số nguyên */</span>
+<span class="kw">int</span> <span class="fn">isChinhPhuong</span>(<span class="kw">int</span> n) {
+    <span class="kw">int</span> s;
+    <span class="kw">if</span> (n < <span class="num">0</span>) <span class="kw">return</span> <span class="num">0</span>;
+    s = (<span class="kw">int</span>)<span class="fn">sqrt</span>((<span class="kw">double</span>)n);
+    <span class="kw">return</span> (s * s == n);
+}
+
+<span class="cm">/* ===== ÁP DỤNG VÀO DSLK ===== */</span>
+
+<span class="cm">/* Đếm số nguyên tố trong DSLK */</span>
+<span class="kw">int</span> <span class="fn">demNguyenTo</span>(<span class="ty">SList</span> sl) {
+    <span class="kw">int</span> dem = <span class="num">0</span>;
+    <span class="ty">SNode</span>* p = sl.Head;
+    <span class="kw">while</span> (p != <span class="kw">NULL</span>) {
+        <span class="kw">if</span> (<span class="fn">isNguyenTo</span>(p->Info)) dem++;
+        p = p->Next;
+    }
+    <span class="kw">return</span> dem;
+}
+
+<span class="cm">/* Tính tổng các số chính phương trong DSLK */</span>
+<span class="kw">long</span> <span class="fn">tongChinhPhuong</span>(<span class="ty">SList</span> sl) {
+    <span class="kw">long</span> tong = <span class="num">0</span>;
+    <span class="ty">SNode</span>* p = sl.Head;
+    <span class="kw">while</span> (p != <span class="kw">NULL</span>) {
+        <span class="kw">if</span> (<span class="fn">isChinhPhuong</span>(p->Info)) tong += p->Info;
+        p = p->Next;
+    }
+    <span class="kw">return</span> tong;
+}
+
+<span class="cm">/* Đếm và nhân đôi các phần tử chia hết cho 3 (bài tập 9) */</span>
+<span class="kw">int</span> <span class="fn">demVaNhanDoi_ChiaHet3</span>(<span class="ty">SList</span> sl) {
+    <span class="kw">int</span> dem = <span class="num">0</span>;
+    <span class="ty">SNode</span>* p = sl.Head;
+    <span class="kw">while</span> (p != <span class="kw">NULL</span>) {
+        <span class="kw">if</span> (p->Info % <span class="num">3</span> == <span class="num">0</span>) { p->Info *= <span class="num">2</span>; dem++; }
+        p = p->Next;
+    }
+    <span class="kw">return</span> dem;
+}</code></pre>
+  <div class="note"><b>📌 Quan trọng khi thi: Cần #include &lt;math.h&gt;</b>
+  Khi dùng <code>sqrt()</code> phải include <code>&lt;math.h&gt;</code>. Biên dịch với cờ <code>-lm</code>: <code>gcc bt.c -o bt -lm</code></div>
+</div>
+
+<!-- 1.3 Tọa độ đa giác -->
+<div class="card">
+  <div class="card-h"><span class="qn">Bài 1.3</span><h3>Info là struct lồng nhau — Tọa độ đỉnh đa giác 2D, tính chu vi</h3></div>
+<pre><code><span class="cm">/* Khi ItemType là struct — cách truy xuất p->Info.x */</span>
+<span class="kw">typedef struct</span> {
+    <span class="kw">float</span> x, y;
+} <span class="ty">DIEM</span>;
+
+<span class="kw">typedef</span> <span class="ty">DIEM</span> <span class="ty">ItemType</span>;   <span class="cm">/* thay typedef int ItemType; */</span>
+
+<span class="cm">/* Khoảng cách Euclid giữa 2 điểm */</span>
+<span class="kw">float</span> <span class="fn">khoangCach</span>(<span class="ty">DIEM</span> a, <span class="ty">DIEM</span> b) {
+    <span class="kw">return</span> (<span class="kw">float</span>)<span class="fn">sqrt</span>((a.x - b.x)*(a.x - b.x) + (a.y - b.y)*(a.y - b.y));
+}
+
+<span class="cm">/* Tính chu vi đa giác (các đỉnh lưu theo thứ tự trong DSLK) */</span>
+<span class="kw">float</span> <span class="fn">chuViDaGiac</span>(<span class="ty">SList</span> sl) {
+    <span class="kw">float</span>   cv = <span class="num">0.0f</span>;
+    <span class="ty">SNode</span>* p  = sl.Head;
+    <span class="kw">if</span> (p == <span class="kw">NULL</span>) <span class="kw">return</span> <span class="num">0.0f</span>;
+    <span class="kw">while</span> (p->Next != <span class="kw">NULL</span>) {
+        cv += <span class="fn">khoangCach</span>(p->Info, p->Next->Info);
+        p = p->Next;
+    }
+    <span class="cm">/* cạnh cuối: nối đỉnh cuối về đỉnh đầu */</span>
+    cv += <span class="fn">khoangCach</span>(sl.Tail->Info, sl.Head->Info);
+    <span class="kw">return</span> cv;
+}</code></pre>
+  <div class="warn"><b>⚠ Cách truy xuất khi Info là struct lồng</b>
+  <code>p-&gt;Info.x</code> và <code>p-&gt;Info.y</code> — dùng dấu <code>.</code> sau <code>Info</code> để vào trường bên trong. KHÔNG viết <code>p-&gt;x</code> (sai). Tương tự: đơn thức → <code>p-&gt;Info.HeSo</code>, <code>p-&gt;Info.SoMu</code>.</div>
+</div>
+
+<!-- 1.4 Sinh viên -->
+<div class="card">
+  <div class="card-h"><span class="qn">Bài 1.4+1.5+1.6</span><h3>Thông tin sinh viên: tính ĐTB, sắp xếp giảm dần theo ĐTB, in 3 sinh viên cao nhất</h3></div>
+<pre><code>typedef struct {
+    char  MaSV[10];
+    char  Ten[50];
+    float DiemGK, DiemTL, DiemCK;
+} SINHVIEN;
+typedef SINHVIEN ItemType;
+
+/* Tính điểm trung bình theo hệ số ví dụ: GK 30%, TL 20%, CK 50% */
+float diemTB(SINHVIEN sv) {
+    return sv.DiemGK * 0.3f + sv.DiemTL * 0.2f + sv.DiemCK * 0.5f;
+}
+
+/* Sắp xếp danh sách sinh viên giảm dần theo ĐTB bằng cách hoán vị Info */
+void sapXepGiamTheoDTB(SList *sl) {
+    SNode *p, *q;
+    for (p = sl->Head; p != NULL; p = p->Next) {
+        for (q = p->Next; q != NULL; q = q->Next) {
+            if (diemTB(p->Info) < diemTB(q->Info)) {
+                SINHVIEN temp = p->Info;
+                p->Info = q->Info;
+                q->Info = temp;
+            }
+        }
+    }
+}
+
+/* In tối đa 3 sinh viên có ĐTB cao nhất sau khi đã sắp xếp */
+void in3SVCaoNhat(SList sl) {
+    int count = 0;
+    SNode *p = sl.Head;
+    while (p != NULL && count < 3) {
+        printf("%s - %s - DTB: %.2f\n", p->Info.MaSV, p->Info.Ten, diemTB(p->Info));
+        p = p->Next;
+        count++;
+    }
+}</code></pre>
+  <div class="note"><b>📌 Vì sao nên sắp xếp trước?</b> Tài liệu ôn tập có hai yêu cầu liên tiếp: sắp xếp sinh viên giảm dần theo ĐTB và in 3 sinh viên cao nhất. Cách này xử lý được cả trường hợp nhiều sinh viên bằng điểm và dễ trình bày hơn khi làm bài.</div>
+</div>
+
+<!-- 1.7 Đa thức -->
+<div class="card">
+  <div class="card-h"><span class="qn">Bài 1.7</span><h3>Lưu đa thức P(x) trên DSLK — Tính giá trị P(x₀)</h3></div>
+<pre><code><span class="kw">typedef struct</span> {
+    <span class="kw">float</span> HeSo;
+    <span class="kw">int</span>   SoMu;
+} <span class="ty">DONTHUC</span>;
+<span class="kw">typedef</span> <span class="ty">DONTHUC</span> <span class="ty">ItemType</span>;
+
+<span class="cm">/* P(x0) = Σ HeSo[i] * x0^SoMu[i] */</span>
+<span class="kw">float</span> <span class="fn">tinhGiaTriDaThuc</span>(<span class="ty">SList</span> sl, <span class="kw">float</span> x0) {
+    <span class="kw">float</span>   ket = <span class="num">0.0f</span>;
+    <span class="ty">SNode</span>* p   = sl.Head;
+    <span class="kw">while</span> (p != <span class="kw">NULL</span>) {
+        ket += p->Info.HeSo * (<span class="kw">float</span>)<span class="fn">pow</span>((<span class="kw">double</span>)x0, p->Info.SoMu);
+        p = p->Next;
+    }
+    <span class="kw">return</span> ket;
+}</code></pre>
+</div>
+
+<!-- 1.8 Tách DSLK -->
+<div class="card">
+  <div class="card-h"><span class="qn">Bài 1.8</span><h3>Tách DSLK số nguyên thành DSLK chẵn và DSLK lẻ</h3></div>
+<pre><code><span class="cm">/* Tách sl thành 2 danh sách: slChan (số chẵn) và slLe (số lẻ) */</span>
+<span class="kw">void</span> <span class="fn">tachChanLe</span>(<span class="ty">SList</span> sl, <span class="ty">SList</span>* slChan, <span class="ty">SList</span>* slLe) {
+    <span class="ty">SNode</span>* p = sl.Head;
+    <span class="fn">initSList</span>(slChan);
+    <span class="fn">initSList</span>(slLe);
+    <span class="kw">while</span> (p != <span class="kw">NULL</span>) {
+        <span class="ty">SNode</span>* newNode = <span class="fn">createSNode</span>(p->Info);
+        <span class="kw">if</span> (p->Info % <span class="num">2</span> == <span class="num">0</span>)
+            <span class="fn">insertTail</span>(slChan, newNode);   <span class="cm">/* chẵn */</span>
+        <span class="kw">else</span>
+            <span class="fn">insertTail</span>(slLe, newNode);     <span class="cm">/* lẻ */</span>
+        p = p->Next;
+    }
+}</code></pre>
+</div>
+
+<!-- 1.11 Đảo ngược -->
+<div class="card">
+  <div class="card-h"><span class="qn">Bài 1.11</span><h3>Đảo ngược toàn bộ danh sách liên kết đơn</h3></div>
+<pre><code><span class="cm">/* Đảo ngược tại chỗ (thay đổi các con trỏ Next) */</span>
+<span class="kw">void</span> <span class="fn">reverseList</span>(<span class="ty">SList</span>* sl) {
+    <span class="ty">SNode</span>* prev = <span class="kw">NULL</span>;
+    <span class="ty">SNode</span>* curr = sl->Head;
+    <span class="ty">SNode</span>* next = <span class="kw">NULL</span>;
+    sl->Tail = sl->Head;       <span class="cm">/* nút đầu trở thành nút cuối */</span>
+    <span class="kw">while</span> (curr != <span class="kw">NULL</span>) {
+        next = curr->Next;     <span class="cm">/* lưu nút kế */</span>
+        curr->Next = prev;     <span class="cm">/* đảo chiều liên kết */</span>
+        prev = curr;
+        curr = next;
+    }
+    sl->Head = prev;           <span class="cm">/* nút cuối trở thành Head */</span>
+}</code></pre>
+</div>
+
+<!-- 1.12 Nối danh sách -->
+<div class="card">
+  <div class="card-h"><span class="qn">Bài 1.12</span><h3>Nối hai danh sách liên kết đơn thành một danh sách duy nhất</h3></div>
+<pre><code>/* Nối sl2 vào cuối sl1, không cấp phát node mới */
+void noiDanhSach(SList *sl1, SList *sl2) {
+    if (sl2->Head == NULL) return;
+    if (sl1->Head == NULL) {
+        sl1->Head = sl2->Head;
+        sl1->Tail = sl2->Tail;
+    } else {
+        sl1->Tail->Next = sl2->Head;
+        sl1->Tail = sl2->Tail;
+    }
+    sl2->Head = sl2->Tail = NULL; /* tránh hai danh sách cùng quản lý một chuỗi node */
+}</code></pre>
+  <div class="warn"><b>⚠ Lưu ý bộ nhớ:</b> Hàm trên nối bằng cách chuyển liên kết, không sao chép dữ liệu. Sau khi nối, đặt sl2 rỗng để tránh giải phóng trùng node.</div>
+</div>
+
+<!-- 1.13 Phân số -->
+<div class="card">
+  <div class="card-h"><span class="qn">Bài 1.13</span><h3>Lưu phân số trên DSLK: tính tổng và in phân số có giá trị lớn hơn 1</h3></div>
+<pre><code>typedef struct {
+    int tuSo;
+    int mauSo;
+} PHANSO;
+typedef PHANSO ItemType;
+
+int ucln(int a, int b) {
+    if (a < 0) a = -a;
+    if (b < 0) b = -b;
+    while (b != 0) {
+        int r = a % b;
+        a = b;
+        b = r;
+    }
+    return a == 0 ? 1 : a;
+}
+
+PHANSO rutGon(PHANSO p) {
+    int d = ucln(p.tuSo, p.mauSo);
+    p.tuSo /= d;
+    p.mauSo /= d;
+    if (p.mauSo < 0) { p.tuSo = -p.tuSo; p.mauSo = -p.mauSo; }
+    return p;
+}
+
+PHANSO congPS(PHANSO a, PHANSO b) {
+    PHANSO c;
+    c.tuSo = a.tuSo * b.mauSo + b.tuSo * a.mauSo;
+    c.mauSo = a.mauSo * b.mauSo;
+    return rutGon(c);
+}
+
+PHANSO tongPhanSo(SList sl) {
+    PHANSO sum = {0, 1};
+    SNode *p = sl.Head;
+    while (p != NULL) {
+        if (p->Info.mauSo != 0) sum = congPS(sum, p->Info);
+        p = p->Next;
+    }
+    return sum;
+}
+
+void inPhanSoLonHon1(SList sl) {
+    SNode *p = sl.Head;
+    while (p != NULL) {
+        if (p->Info.mauSo != 0 && (float)p->Info.tuSo / p->Info.mauSo > 1.0f)
+            printf("%d/%d ", p->Info.tuSo, p->Info.mauSo);
+        p = p->Next;
+    }
+}</code></pre>
+</div>
+
+<!-- ======================================================= -->
+<!-- § 2: STACK -->
+<!-- ======================================================= -->
+<div id="stack" class="sec">
+  <div class="secn s2">2</div>
+  <div><h2>Ngăn xếp (Stack) — Biểu thức toán học</h2>
+  <span class="tag" style="background:rgba(188,140,255,.12);color:var(--acc2)">Infix→Postfix</span>
+  <span class="tag" style="background:rgba(188,140,255,.12);color:var(--acc2)">Eval Postfix</span>
+  <span class="tag" style="background:rgba(188,140,255,.12);color:var(--acc2)">Kiểm tra ngoặc</span></div>
+</div>
+
+<!-- Khai báo Stack mảng -->
+<div class="card">
+  <div class="card-h"><span class="qn">Cơ sở</span><h3>Khai báo Stack bằng mảng — Ngôn ngữ C (theo tr. 141–143 GT Thầy Thọ)</h3></div>
+<pre><code><span class="pp">#define MAXSIZE 100</span>
+<span class="kw">typedef int</span> <span class="ty">ItemType</span>;   <span class="cm">/* cho Stack số nguyên */</span>
+
+<span class="kw">typedef struct</span> {
+    <span class="ty">ItemType</span> Info[<span class="ty">MAXSIZE</span>];
+    <span class="kw">int</span>      Top;   <span class="cm">/* -1 khi rỗng */</span>
+} <span class="ty">Stack</span>;
+
+<span class="kw">void</span> <span class="fn">initStack</span>(<span class="ty">Stack</span>* s) { s->Top = <span class="num">-1</span>; }
+<span class="kw">int</span>  <span class="fn">isEmptyStack</span>(<span class="ty">Stack</span> s) { <span class="kw">return</span> s.Top == <span class="num">-1</span>; }
+<span class="kw">int</span>  <span class="fn">isFullStack</span>(<span class="ty">Stack</span> s)  { <span class="kw">return</span> s.Top >= MAXSIZE - <span class="num">1</span>; }
+
+<span class="kw">int</span> <span class="fn">push</span>(<span class="ty">Stack</span>* s, <span class="ty">ItemType</span> x) {
+    <span class="kw">if</span> (<span class="fn">isFullStack</span>(*s)) <span class="kw">return</span> <span class="num">0</span>;
+    s->Info[++(s->Top)] = x;
+    <span class="kw">return</span> <span class="num">1</span>;
+}
+
+<span class="kw">int</span> <span class="fn">pop</span>(<span class="ty">Stack</span>* s, <span class="ty">ItemType</span>* x) {
+    <span class="kw">if</span> (<span class="fn">isEmptyStack</span>(*s)) <span class="kw">return</span> <span class="num">0</span>;
+    *x = s->Info[(s->Top)--];
+    <span class="kw">return</span> <span class="num">1</span>;
+}
+
+<span class="kw">int</span> <span class="fn">getTop</span>(<span class="ty">Stack</span> s, <span class="ty">ItemType</span>* x) {
+    <span class="kw">if</span> (<span class="fn">isEmptyStack</span>(s)) <span class="kw">return</span> <span class="num">0</span>;
+    *x = s.Info[s.Top];
+    <span class="kw">return</span> <span class="num">1</span>;
+}</code></pre>
+  <div class="note"><b>📌 Quy ước C thuần</b>
+  Hàm nhận con trỏ <code>Stack*</code> và <code>ItemType*</code> — không có tham chiếu <code>&amp;</code>. Gọi hàm phải truyền địa chỉ: <code>push(&amp;s, x)</code>, <code>pop(&amp;s, &amp;x)</code>.</div>
+</div>
+
+<!-- Lý thuyết infix postfix -->
+<div class="card">
+  <div class="card-h"><span class="qn">Lý thuyết</span><h3>Giải thuật Infix → Postfix bằng lời — CLO2 (4 ý × 0.25đ)</h3></div>
+  <ol class="steps">
+    <li>Đọc tuần tự từng ký tự từ trái qua phải trong biểu thức Infix.</li>
+    <li>Nếu ký tự là <strong>toán hạng</strong> (chữ số, biến): ghi ngay vào chuỗi kết quả (Postfix).</li>
+    <li>Nếu là <strong>dấu mở ngoặc <code>(</code></strong>: push vào Stack.</li>
+    <li>Nếu là <strong>toán tử</strong> (<code>+</code>,<code>−</code>,<code>×</code>,<code>÷</code>): pop và ghi ra kết quả tất cả toán tử trên đỉnh Stack có <em>độ ưu tiên ≥ toán tử hiện tại</em> (trừ dấu <code>(</code>), rồi push toán tử hiện tại vào Stack.<br><small style="color:var(--muted)">Ưu tiên: <code>*</code>, <code>/</code> = 2 &nbsp;&gt;&nbsp; <code>+</code>, <code>-</code> = 1 &nbsp;|&nbsp; <code>(</code> trong Stack = 0</small></li>
+    <li>Nếu là <strong>dấu đóng ngoặc <code>)</code></strong>: pop và ghi ra kết quả liên tục đến khi gặp <code>(</code>; pop <code>(</code> ra nhưng <em>không</em> ghi vào kết quả.</li>
+    <li>Hết biểu thức: pop tất cả phần còn lại trong Stack vào chuỗi kết quả.</li>
+  </ol>
+  <div class="note"><b>📌 Bảng độ ưu tiên</b>
+  <code>*</code>, <code>/</code> → mức 2 &nbsp;|&nbsp; <code>+</code>, <code>-</code> → mức 1 &nbsp;|&nbsp; <code>(</code> khi đã ở trong Stack → mức 0 (không pop ra trừ khi gặp <code>)</code>)</div>
+</div>
+
+<!-- Bài 2.1: Infix->Postfix bảng 1 -->
+<div class="card">
+  <div class="card-h"><span class="qn">Bài 2.1</span><h3>Infix → Postfix: <code>M = ((3 + 5) - (6 / 2 - 1)) - 4</code></h3></div>
+  <div class="tw">
+  <table>
+    <tr><th>STT</th><th>Ký tự đọc</th><th>Trạng thái Stack (đáy→đỉnh)</th><th>Chuỗi kết quả</th><th>Thao tác</th></tr>
+    <tr><td>1</td><td>(</td><td>(</td><td></td><td class="tl">Push (</td></tr>
+    <tr><td>2</td><td>(</td><td>( (</td><td></td><td class="tl">Push (</td></tr>
+    <tr><td>3</td><td>3</td><td>( (</td><td>3</td><td class="tl">Ghi ra</td></tr>
+    <tr><td>4</td><td>+</td><td>( ( +</td><td>3</td><td class="tl">Push + (Stack đỉnh là ( → không pop)</td></tr>
+    <tr><td>5</td><td>5</td><td>( ( +</td><td>3 5</td><td class="tl">Ghi ra</td></tr>
+    <tr><td>6</td><td>)</td><td>(</td><td class="hl">3 5 +</td><td class="tl">Pop đến ( → ghi +; pop ( bỏ</td></tr>
+    <tr><td>7</td><td>-</td><td>( -</td><td>3 5 +</td><td class="tl">Đỉnh=( (ưu tiên 0) < - (ưu tiên 1) → Push -</td></tr>
+    <tr><td>8</td><td>(</td><td>( - (</td><td>3 5 +</td><td class="tl">Push (</td></tr>
+    <tr><td>9</td><td>6</td><td>( - (</td><td>3 5 + 6</td><td class="tl">Ghi ra</td></tr>
+    <tr><td>10</td><td>/</td><td>( - ( /</td><td>3 5 + 6</td><td class="tl">Push / (đỉnh là ( → không pop)</td></tr>
+    <tr><td>11</td><td>2</td><td>( - ( /</td><td>3 5 + 6 2</td><td class="tl">Ghi ra</td></tr>
+    <tr><td>12</td><td>-</td><td>( - ( -</td><td class="hl">3 5 + 6 2 /</td><td class="tl">/ (ưu tiên 2) ≥ - (ưu tiên 1) → pop ghi /; Push -</td></tr>
+    <tr><td>13</td><td>1</td><td>( - ( -</td><td>3 5 + 6 2 / 1</td><td class="tl">Ghi ra</td></tr>
+    <tr><td>14</td><td>)</td><td>( -</td><td class="hl">3 5 + 6 2 / 1 -</td><td class="tl">Pop đến ( → ghi -; pop ( bỏ</td></tr>
+    <tr><td>15</td><td>)</td><td>rỗng</td><td class="hl">3 5 + 6 2 / 1 - -</td><td class="tl">Pop đến ( → ghi -; pop ( bỏ</td></tr>
+    <tr><td>16</td><td>-</td><td>-</td><td>3 5 + 6 2 / 1 - -</td><td class="tl">Stack rỗng → Push -</td></tr>
+    <tr><td>17</td><td>4</td><td>-</td><td>3 5 + 6 2 / 1 - - 4</td><td class="tl">Ghi ra</td></tr>
+    <tr><td>18</td><td>EOF</td><td>rỗng</td><td class="gr">3 5 + 6 2 / 1 - - 4 -</td><td class="tl">Pop nốt → ghi -</td></tr>
+  </table>
+  </div>
+  <div class="note"><b>✅ Kết quả Postfix: <code>3 5 + 6 2 / 1 - - 4 -</code></b></div>
+</div>
+
+<!-- Bài 2.2 -->
+<div class="card">
+  <div class="card-h"><span class="qn">Bài 2.2</span><h3>Infix → Postfix: <code>M = (2 * 3 - 4 + 2) / (4 - 2)</code></h3></div>
+  <div class="tw">
+  <table>
+    <tr><th>STT</th><th>Ký tự</th><th>Stack</th><th>Kết quả</th><th>Thao tác</th></tr>
+    <tr><td>1</td><td>(</td><td>(</td><td></td><td class="tl">Push (</td></tr>
+    <tr><td>2</td><td>2</td><td>(</td><td>2</td><td class="tl">Ghi ra</td></tr>
+    <tr><td>3</td><td>*</td><td>( *</td><td>2</td><td class="tl">Push *</td></tr>
+    <tr><td>4</td><td>3</td><td>( *</td><td>2 3</td><td class="tl">Ghi ra</td></tr>
+    <tr><td>5</td><td>-</td><td>( -</td><td class="hl">2 3 *</td><td class="tl">* (2) ≥ - (1) → pop ghi *; Push -</td></tr>
+    <tr><td>6</td><td>4</td><td>( -</td><td>2 3 * 4</td><td class="tl">Ghi ra</td></tr>
+    <tr><td>7</td><td>+</td><td>( +</td><td class="hl">2 3 * 4 -</td><td class="tl">- (1) ≥ + (1) → pop ghi -; Push +</td></tr>
+    <tr><td>8</td><td>2</td><td>( +</td><td>2 3 * 4 - 2</td><td class="tl">Ghi ra</td></tr>
+    <tr><td>9</td><td>)</td><td>rỗng</td><td class="hl">2 3 * 4 - 2 +</td><td class="tl">Pop đến ( → ghi +; pop ( bỏ</td></tr>
+    <tr><td>10</td><td>/</td><td>/</td><td>2 3 * 4 - 2 +</td><td class="tl">Stack rỗng → Push /</td></tr>
+    <tr><td>11</td><td>(</td><td>/ (</td><td>2 3 * 4 - 2 +</td><td class="tl">Push (</td></tr>
+    <tr><td>12</td><td>4</td><td>/ (</td><td>2 3 * 4 - 2 + 4</td><td class="tl">Ghi ra</td></tr>
+    <tr><td>13</td><td>-</td><td>/ ( -</td><td>2 3 * 4 - 2 + 4</td><td class="tl">Push - (đỉnh là ( )</td></tr>
+    <tr><td>14</td><td>2</td><td>/ ( -</td><td>2 3 * 4 - 2 + 4 2</td><td class="tl">Ghi ra</td></tr>
+    <tr><td>15</td><td>)</td><td>/</td><td class="hl">2 3 * 4 - 2 + 4 2 -</td><td class="tl">Pop đến ( → ghi -; pop ( bỏ</td></tr>
+    <tr><td>16</td><td>EOF</td><td>rỗng</td><td class="gr">2 3 * 4 - 2 + 4 2 - /</td><td class="tl">Pop / còn lại</td></tr>
+  </table>
+  </div>
+  <div class="note"><b>✅ Kết quả Postfix: <code>2 3 * 4 - 2 + 4 2 - /</code></b></div>
+</div>
+
+<!-- Bài 2.3 Eval -->
+<div class="card">
+  <div class="card-h"><span class="qn">Bài 2.3</span><h3>Tính Postfix: <code>M = 8 2 3 * - 5 4 + * 3 /</code></h3></div>
+  <p class="p"><b>Giải thuật tính Postfix bằng lời:</b> Đọc từng ký tự. Nếu là toán hạng → Push. Nếu là toán tử → Pop b (đỉnh), Pop a (kế), tính <code>a op b</code>, Push kết quả. Cuối cùng Pop ra kết quả.</p>
+  <div class="tw">
+  <table>
+    <tr><th>Ký tự</th><th>Stack (đáy→đỉnh)</th><th>Thao tác chi tiết</th></tr>
+    <tr><td>8</td><td>8</td><td class="tl">Push 8</td></tr>
+    <tr><td>2</td><td>8, 2</td><td class="tl">Push 2</td></tr>
+    <tr><td>3</td><td>8, 2, 3</td><td class="tl">Push 3</td></tr>
+    <tr><td class="hl">*</td><td>8, 6</td><td class="tl">b=Pop()=3, a=Pop()=2 → 2×3=6 → Push 6</td></tr>
+    <tr><td class="hl">-</td><td>2</td><td class="tl">b=Pop()=6, a=Pop()=8 → 8-6=2 → Push 2</td></tr>
+    <tr><td>5</td><td>2, 5</td><td class="tl">Push 5</td></tr>
+    <tr><td>4</td><td>2, 5, 4</td><td class="tl">Push 4</td></tr>
+    <tr><td class="hl">+</td><td>2, 9</td><td class="tl">b=Pop()=4, a=Pop()=5 → 5+4=9 → Push 9</td></tr>
+    <tr><td class="hl">*</td><td>18</td><td class="tl">b=Pop()=9, a=Pop()=2 → 2×9=18 → Push 18</td></tr>
+    <tr><td>3</td><td>18, 3</td><td class="tl">Push 3</td></tr>
+    <tr><td class="hl">/</td><td class="gr">6</td><td class="tl">b=Pop()=3, a=Pop()=18 → 18÷3=6 → Push 6</td></tr>
+  </table>
+  </div>
+  <div class="note"><b>✅ Kết quả: M = 6</b></div>
+</div>
+
+<!-- Bài 2.4 -->
+<div class="card">
+  <div class="card-h"><span class="qn">Bài 2.4</span><h3>Tính Postfix: <code>M = 1 5 * 3 - 2 3 + * 5 /</code></h3></div>
+  <div class="tw">
+  <table>
+    <tr><th>Ký tự</th><th>Stack</th><th>Thao tác</th></tr>
+    <tr><td>1</td><td>1</td><td class="tl">Push 1</td></tr>
+    <tr><td>5</td><td>1, 5</td><td class="tl">Push 5</td></tr>
+    <tr><td class="hl">*</td><td>5</td><td class="tl">b=5, a=1 → 1×5=5 → Push 5</td></tr>
+    <tr><td>3</td><td>5, 3</td><td class="tl">Push 3</td></tr>
+    <tr><td class="hl">-</td><td>2</td><td class="tl">b=3, a=5 → 5-3=2 → Push 2</td></tr>
+    <tr><td>2</td><td>2, 2</td><td class="tl">Push 2</td></tr>
+    <tr><td>3</td><td>2, 2, 3</td><td class="tl">Push 3</td></tr>
+    <tr><td class="hl">+</td><td>2, 5</td><td class="tl">b=3, a=2 → 2+3=5 → Push 5</td></tr>
+    <tr><td class="hl">*</td><td>10</td><td class="tl">b=5, a=2 → 2×5=10 → Push 10</td></tr>
+    <tr><td>5</td><td>10, 5</td><td class="tl">Push 5</td></tr>
+    <tr><td class="hl">/</td><td class="gr">2</td><td class="tl">b=5, a=10 → 10÷5=2 → Push 2</td></tr>
+  </table>
+  </div>
+  <div class="note"><b>✅ Kết quả: M = 2</b></div>
+</div>
+
+<!-- Bài 2.5 ngoặc -->
+<div class="card">
+  <div class="card-h"><span class="qn">Bài 2.5</span><h3>Kiểm tra ngoặc hợp lệ: chuỗi <code>()[()(())])</code></h3></div>
+  <p class="p"><b>Giải thuật bằng lời:</b> Duyệt từng ký tự. Gặp <code>(</code> hoặc <code>[</code> → Push. Gặp <code>)</code> hoặc <code>]</code> → nếu Stack rỗng → KHÔNG HỢP LỆ; ngược lại pop đỉnh và kiểm tra khớp (( khớp ), [ khớp ]). Hết chuỗi: Stack rỗng → HỢP LỆ, còn phần tử → KHÔNG HỢP LỆ.</p>
+  <div class="tw">
+  <table>
+    <tr><th>STT</th><th>Ký tự</th><th>Stack</th><th>Trạng thái</th></tr>
+    <tr><td>1</td><td>(</td><td>(</td><td class="tl">Push (</td></tr>
+    <tr><td>2</td><td>)</td><td>rỗng</td><td class="tl">Pop → ( khớp ) ✓</td></tr>
+    <tr><td>3</td><td>[</td><td>[</td><td class="tl">Push [</td></tr>
+    <tr><td>4</td><td>(</td><td>[ (</td><td class="tl">Push (</td></tr>
+    <tr><td>5</td><td>)</td><td>[</td><td class="tl">Pop → ( khớp ) ✓</td></tr>
+    <tr><td>6</td><td>(</td><td>[ (</td><td class="tl">Push (</td></tr>
+    <tr><td>7</td><td>(</td><td>[ ( (</td><td class="tl">Push (</td></tr>
+    <tr><td>8</td><td>)</td><td>[ (</td><td class="tl">Pop → ( khớp ) ✓</td></tr>
+    <tr><td>9</td><td>]</td><td>rỗng</td><td class="tl">Pop → [ khớp ] ✓ — nhưng còn ( chưa đóng!</td></tr>
+    <tr><td>10</td><td class="rd">)</td><td>rỗng</td><td class="tl rd"><b>Stack rỗng! Không có ngoặc mở tương ứng → KHÔNG HỢP LỆ</b></td></tr>
+  </table>
+  </div>
+  <div class="err"><b>❌ Kết quả: KHÔNG HỢP LỆ</b> — Hai lý do: (1) Bước 10: Stack rỗng khi gặp <code>)</code>; (2) Sau bước 9 còn nút <code>(</code> (bước 6) chưa được đóng trong Stack.</div>
+</div>
+
+<!-- Code stack C cho biểu thức -->
+<div class="card">
+  <div class="card-h"><span class="qn">Code C</span><h3>Hàm kiểm tra ngoặc hợp lệ — Ngôn ngữ C</h3></div>
+<pre><code><span class="pp">#include &lt;stdio.h&gt;</span>
+<span class="pp">#define MAXSIZE 100</span>
+
+<span class="kw">typedef char</span> <span class="ty">ItemType</span>;   <span class="cm">/* Stack ký tự cho bài toán ngoặc */</span>
+
+<span class="kw">typedef struct</span> {
+    <span class="ty">ItemType</span> Info[MAXSIZE];
+    <span class="kw">int</span>      Top;
+} <span class="ty">Stack</span>;
+
+<span class="kw">void</span> <span class="fn">initStack</span>(<span class="ty">Stack</span>* s) { s->Top = <span class="num">-1</span>; }
+<span class="kw">int</span>  <span class="fn">isEmptyStack</span>(<span class="ty">Stack</span> s) { <span class="kw">return</span> s.Top == <span class="num">-1</span>; }
+<span class="kw">void</span> <span class="fn">push</span>(<span class="ty">Stack</span>* s, <span class="kw">char</span> c) { s->Info[++(s->Top)] = c; }
+<span class="kw">char</span> <span class="fn">pop</span>(<span class="ty">Stack</span>* s) { <span class="kw">return</span> s->Info[(s->Top)--]; }
+<span class="kw">char</span> <span class="fn">topVal</span>(<span class="ty">Stack</span> s) { <span class="kw">return</span> s.Info[s.Top]; }
+
+<span class="cm">/* Kiểm tra chuỗi ngoặc hợp lệ: trả về 1 nếu hợp lệ, 0 nếu không */</span>
+<span class="kw">int</span> <span class="fn">kiemTraNgoac</span>(<span class="kw">const char</span>* str) {
+    <span class="ty">Stack</span> s;
+    <span class="fn">initStack</span>(&s);
+    <span class="kw">int</span> i;
+    <span class="kw">for</span> (i = <span class="num">0</span>; str[i] != <span class="str">'\0'</span>; i++) {
+        <span class="kw">char</span> c = str[i];
+        <span class="kw">if</span> (c == <span class="str">'('</span> || c == <span class="str">'['</span>) {
+            <span class="fn">push</span>(&s, c);
+        } <span class="kw">else if</span> (c == <span class="str">')'</span>) {
+            <span class="kw">if</span> (<span class="fn">isEmptyStack</span>(s) || <span class="fn">topVal</span>(s) != <span class="str">'('</span>) <span class="kw">return</span> <span class="num">0</span>;
+            <span class="fn">pop</span>(&s);
+        } <span class="kw">else if</span> (c == <span class="str">']'</span>) {
+            <span class="kw">if</span> (<span class="fn">isEmptyStack</span>(s) || <span class="fn">topVal</span>(s) != <span class="str">'['</span>) <span class="kw">return</span> <span class="num">0</span>;
+            <span class="fn">pop</span>(&s);
+        }
+    }
+    <span class="kw">return</span> <span class="fn">isEmptyStack</span>(s);  <span class="cm">/* rỗng = hợp lệ */</span>
+}</code></pre>
+</div>
+
+
+<!-- Stack mở rộng theo đề ôn tập -->
+<div class="card">
+  <div class="card-h"><span class="qn">Mở rộng</span><h3>Chuyển cơ số bằng Stack: đổi số nguyên dương n từ hệ 10 sang hệ a (2 ≤ a ≤ 9)</h3></div>
+<pre><code>void chuyenCoSo(int n, int a) {
+    Stack s;
+    int du;
+    initStack(&s);
+    if (n == 0) { printf("0"); return; }
+    while (n > 0) {
+        du = n % a;
+        push(&s, du);
+        n = n / a;
+    }
+    while (!isEmptyStack(s)) {
+        pop(&s, &du);
+        printf("%d", du);
+    }
+}</code></pre>
+  <div class="note"><b>Nguồn:</b> Dạng này là mở rộng theo đề ôn tập. Ý tưởng Stack: phần dư sinh ra ngược thứ tự cần in, nên dùng LIFO để đảo lại.</div>
+</div>
+
+<div class="card">
+  <div class="card-h"><span class="qn">Mở rộng</span><h3>Khử đệ quy tính giai thừa bằng Stack</h3></div>
+<pre><code>long giaiThuaStack(int n) {
+    Stack s;
+    int x;
+    long kq = 1;
+    initStack(&s);
+    for (x = n; x >= 2; x--) push(&s, x);
+    while (!isEmptyStack(s)) {
+        pop(&s, &x);
+        kq *= x;
+    }
+    return kq;
+}</code></pre>
+</div>
+
+<div class="card">
+  <div class="card-h"><span class="qn">Queue</span><h3>Mô phỏng Queue: Enqueue/Dequeue và hệ thống in</h3></div>
+<pre><code>#define MAXQ 100
+typedef int QItemType;
+
+typedef struct {
+    QItemType Info[MAXQ];
+    int Front, Rear;
+} Queue;
+
+void initQueue(Queue *q) { q->Front = q->Rear = -1; }
+int isEmptyQueue(Queue q) { return q.Front == -1; }
+int isFullQueue(Queue q) { return (q.Rear + 1) % MAXQ == q.Front; }
+
+int enQueue(Queue *q, QItemType x) {
+    if (isFullQueue(*q)) return 0;
+    if (isEmptyQueue(*q)) q->Front = q->Rear = 0;
+    else q->Rear = (q->Rear + 1) % MAXQ;
+    q->Info[q->Rear] = x;
+    return 1;
+}
+
+int deQueue(Queue *q, QItemType *x) {
+    if (isEmptyQueue(*q)) return 0;
+    *x = q->Info[q->Front];
+    if (q->Front == q->Rear) q->Front = q->Rear = -1;
+    else q->Front = (q->Front + 1) % MAXQ;
+    return 1;
+}
+
+/* Ví dụ hệ thống in: tiếp nhận 3 lệnh, hoàn thành 2 lệnh */
+void moPhongMayIn() {
+    Queue q;
+    int job;
+    initQueue(&q);
+    enQueue(&q, 101); enQueue(&q, 102); enQueue(&q, 103);
+    deQueue(&q, &job); printf("Da in lenh %d\n", job);
+    deQueue(&q, &job); printf("Da in lenh %d\n", job);
+}</code></pre>
+  <div class="note"><b>Nguồn:</b> Queue và thao tác Enqueue/Dequeue lấy theo trọng tâm giáo trình; ví dụ hệ thống in là mở rộng theo đề ôn tập.</div>
+</div>
+
+<!-- ======================================================= -->
+<!-- § 3: CÂY AVL -->
+<!-- ======================================================= -->
+<div id="avl" class="sec">
+  <div class="secn s3">3</div>
+  <div><h2>Cây nhị phân BST & Cây cân bằng AVL</h2>
+  <span class="tag tag2">Đệ quy BST</span><span class="tag tag2">4 phép xoay</span><span class="tag tag2">Ngôn ngữ C</span></div>
+</div>
+
+<!-- Khai báo cây -->
+<div class="card">
+  <div class="card-h"><span class="qn">Cơ sở</span><h3>Khai báo TNode, BTree và AVL — Ngôn ngữ C (tr. 160, 178 GT Thầy Thọ)</h3></div>
+<pre><code><span class="kw">typedef int</span> <span class="ty">ItemType</span>;
+
+<span class="cm">/* ---- Nút cây nhị phân thường (BST) ---- */</span>
+<span class="kw">typedef struct</span> <span class="ty">TNode</span> {
+    <span class="ty">ItemType</span>       Info;
+    <span class="kw">struct</span> <span class="ty">TNode</span>* Left;
+    <span class="kw">struct</span> <span class="ty">TNode</span>* Right;
+} <span class="ty">TNode</span>;
+
+<span class="kw">typedef struct</span> { <span class="ty">TNode</span>* Root; } <span class="ty">BTree</span>;
+
+<span class="cm">/* Tạo nút mới */</span>
+<span class="ty">TNode</span>* <span class="fn">createTNode</span>(<span class="ty">ItemType</span> x) {
+    <span class="ty">TNode</span>* p = (<span class="ty">TNode</span>*)<span class="fn">malloc</span>(<span class="kw">sizeof</span>(<span class="ty">TNode</span>));
+    <span class="kw">if</span> (p) { p->Info = x; p->Left = p->Right = <span class="kw">NULL</span>; }
+    <span class="kw">return</span> p;
+}
+
+<span class="cm">/* ---- Nút cây AVL (thêm trường balFactor) ---- */</span>
+<span class="pp">#define LH -1    </span><span class="cm">/* Left Higher  — cây con trái cao hơn */</span>
+<span class="pp">#define EH  0    </span><span class="cm">/* Equal Height — hai nhánh bằng nhau  */</span>
+<span class="pp">#define RH  1    </span><span class="cm">/* Right Higher — cây con phải cao hơn */</span>
+
+<span class="kw">typedef struct</span> <span class="ty">AVLNode</span> {
+    <span class="kw">int</span>              balFactor;   <span class="cm">/* LH=-1, EH=0, RH=+1 */</span>
+    <span class="ty">ItemType</span>         Info;
+    <span class="kw">struct</span> <span class="ty">AVLNode</span>* Left;
+    <span class="kw">struct</span> <span class="ty">AVLNode</span>* Right;
+} <span class="ty">AVLNode</span>;
+
+<span class="kw">typedef struct</span> { <span class="ty">AVLNode</span>* Root; } <span class="ty">AVLTree</span>;
+
+<span class="ty">AVLNode</span>* <span class="fn">createAVLNode</span>(<span class="ty">ItemType</span> x) {
+    <span class="ty">AVLNode</span>* p = (<span class="ty">AVLNode</span>*)<span class="fn">malloc</span>(<span class="kw">sizeof</span>(<span class="ty">AVLNode</span>));
+    <span class="kw">if</span> (p) { p->Info = x; p->balFactor = EH; p->Left = p->Right = <span class="kw">NULL</span>; }
+    <span class="kw">return</span> p;
+}</code></pre>
+</div>
+
+<!-- Hàm đệ quy BST -->
+<div class="card">
+  <div class="card-h"><span class="qn">Câu 3a</span><h3>Hàm đệ quy trên BST — Đếm nút theo điều kiện & theo Mức k (CLO2)</h3></div>
+<pre><code><span class="cm">/* 1. Đếm tổng số nút */</span>
+<span class="kw">int</span> <span class="fn">countNodes</span>(<span class="ty">TNode</span>* root) {
+    <span class="kw">if</span> (root == <span class="kw">NULL</span>) <span class="kw">return</span> <span class="num">0</span>;
+    <span class="kw">return</span> <span class="num">1</span> + <span class="fn">countNodes</span>(root->Left) + <span class="fn">countNodes</span>(root->Right);
+}
+
+<span class="cm">/* 2. Đếm nút lá (không có con nào) */</span>
+<span class="kw">int</span> <span class="fn">countLeaves</span>(<span class="ty">TNode</span>* root) {
+    <span class="kw">if</span> (root == <span class="kw">NULL</span>) <span class="kw">return</span> <span class="num">0</span>;
+    <span class="kw">if</span> (root->Left == <span class="kw">NULL</span> && root->Right == <span class="kw">NULL</span>) <span class="kw">return</span> <span class="num">1</span>;
+    <span class="kw">return</span> <span class="fn">countLeaves</span>(root->Left) + <span class="fn">countLeaves</span>(root->Right);
+}
+
+<span class="cm">/* 3. Đếm nút chỉ có đúng 1 con */</span>
+<span class="kw">int</span> <span class="fn">countOneChild</span>(<span class="ty">TNode</span>* root) {
+    <span class="kw">int</span> cur;
+    <span class="kw">if</span> (root == <span class="kw">NULL</span>) <span class="kw">return</span> <span class="num">0</span>;
+    cur = ((root->Left == <span class="kw">NULL</span>) != (root->Right == <span class="kw">NULL</span>)) ? <span class="num">1</span> : <span class="num">0</span>;
+    <span class="kw">return</span> cur + <span class="fn">countOneChild</span>(root->Left) + <span class="fn">countOneChild</span>(root->Right);
+}
+
+<span class="cm">/* 4. Đếm nút tại Mức k (k=0 là gốc) — DẠNG THI HAY RA NHẤT */</span>
+<span class="kw">int</span> <span class="fn">countAtLevel</span>(<span class="ty">TNode</span>* root, <span class="kw">int</span> k) {
+    <span class="kw">if</span> (root == <span class="kw">NULL</span>) <span class="kw">return</span> <span class="num">0</span>;
+    <span class="kw">if</span> (k == <span class="num">0</span>) <span class="kw">return</span> <span class="num">1</span>;   <span class="cm">/* đúng tại mức này */</span>
+    <span class="kw">return</span> <span class="fn">countAtLevel</span>(root->Left, k-<span class="num">1</span>) + <span class="fn">countAtLevel</span>(root->Right, k-<span class="num">1</span>);
+}
+
+<span class="cm">/* 5. Đếm nút số nguyên tố tại mức k */</span>
+<span class="kw">int</span> <span class="fn">countPrimeAtLevel</span>(<span class="ty">TNode</span>* root, <span class="kw">int</span> k) {
+    <span class="kw">if</span> (root == <span class="kw">NULL</span>) <span class="kw">return</span> <span class="num">0</span>;
+    <span class="kw">if</span> (k == <span class="num">0</span>) <span class="kw">return</span> <span class="fn">isNguyenTo</span>(root->Info) ? <span class="num">1</span> : <span class="num">0</span>;
+    <span class="kw">return</span> <span class="fn">countPrimeAtLevel</span>(root->Left, k-<span class="num">1</span>)
+         + <span class="fn">countPrimeAtLevel</span>(root->Right, k-<span class="num">1</span>);
+}
+
+<span class="cm">/* 6. Tổng các nút tại mức k */</span>
+<span class="kw">int</span> <span class="fn">sumAtLevel</span>(<span class="ty">TNode</span>* root, <span class="kw">int</span> k) {
+    <span class="kw">if</span> (root == <span class="kw">NULL</span>) <span class="kw">return</span> <span class="num">0</span>;
+    <span class="kw">if</span> (k == <span class="num">0</span>) <span class="kw">return</span> root->Info;
+    <span class="kw">return</span> <span class="fn">sumAtLevel</span>(root->Left, k-<span class="num">1</span>) + <span class="fn">sumAtLevel</span>(root->Right, k-<span class="num">1</span>);
+}
+
+<span class="cm">/* 7. Tổng các nút số chẵn */</span>
+<span class="kw">long</span> <span class="fn">sumEven</span>(<span class="ty">TNode</span>* root) {
+    <span class="kw">if</span> (root == <span class="kw">NULL</span>) <span class="kw">return</span> <span class="num">0</span>;
+    <span class="kw">long</span> cur = (root->Info % <span class="num">2</span> == <span class="num">0</span>) ? root->Info : <span class="num">0</span>;
+    <span class="kw">return</span> cur + <span class="fn">sumEven</span>(root->Left) + <span class="fn">sumEven</span>(root->Right);
+}
+
+<span class="cm">/* 8. In các nút tại mức k (dùng trong đề: "xuất nút tầng k") */</span>
+<span class="kw">void</span> <span class="fn">printAtLevel</span>(<span class="ty">TNode</span>* root, <span class="kw">int</span> k) {
+    <span class="kw">if</span> (root == <span class="kw">NULL</span>) <span class="kw">return</span>;
+    <span class="kw">if</span> (k == <span class="num">0</span>) { <span class="fn">printf</span>(<span class="str">"%d "</span>, root->Info); <span class="kw">return</span>; }
+    <span class="fn">printAtLevel</span>(root->Left, k-<span class="num">1</span>);
+    <span class="fn">printAtLevel</span>(root->Right, k-<span class="num">1</span>);
+}
+
+<span class="cm">/* 9. Duyệt LNR (Inorder — cho kết quả tăng dần trên BST) */</span>
+<span class="kw">void</span> <span class="fn">traverseLNR</span>(<span class="ty">TNode</span>* root) {
+    <span class="kw">if</span> (root == <span class="kw">NULL</span>) <span class="kw">return</span>;
+    <span class="fn">traverseLNR</span>(root->Left);
+    <span class="fn">printf</span>(<span class="str">"%d "</span>, root->Info);
+    <span class="fn">traverseLNR</span>(root->Right);
+}</code></pre>
+  <div class="note"><b>📌 Pattern đệ quy theo mức k — ghi nhớ</b>
+  Nếu <code>k==0</code> xử lý nút hiện tại. Gọi đệ quy trái/phải với <code>k-1</code>. Đây là pattern chuẩn cho mọi bài "đếm/in/tổng tại mức k".</div>
+</div>
+
+<!-- AVL Xoay -->
+<div class="card">
+  <div class="card-h"><span class="qn">Lý thuyết</span><h3>4 Phép xoay AVL — Định nghĩa & Code C (tr. 181–186 GT Thầy Thọ)</h3></div>
+  <div class="grid2">
+    <div class="sub">
+      <h4>LL — Xoay phải tại T</h4>
+      <p class="p">Mất CB lệch <strong>trái-trái</strong>: cây con phải của T1 (LH) gây ra.<br>→ Xoay phải T: T1 lên thay T.</p>
+<pre style="font-size:11.5px;padding:10px"><code>Trước:  T [BF=-2]      Sau:  T1
+       T1   R    →    L1   T
+       L1  R1              R1 R</code></pre>
+    </div>
+    <div class="sub">
+      <h4>RR — Xoay trái tại T</h4>
+      <p class="p">Mất CB lệch <strong>phải-phải</strong>: cây con phải của T1 (RH) gây ra.<br>→ Xoay trái T: T1 lên thay T.</p>
+<pre style="font-size:11.5px;padding:10px"><code>Trước: T [BF=+2]       Sau:  T1
+      L    T1     →   T   R1
+          L1 R1      L L1</code></pre>
+    </div>
+    <div class="sub">
+      <h4>LR — Xoay trái T1 rồi phải T</h4>
+      <p class="p">Mất CB lệch <strong>trái-phải</strong>: T lệch trái, nhưng T1 lại lệch phải.<br>→ Bước 1: rotateRR(T->Left). Bước 2: rotateLL(T).</p>
+    </div>
+    <div class="sub">
+      <h4>RL — Xoay phải T1 rồi trái T</h4>
+      <p class="p">Mất CB lệch <strong>phải-trái</strong>: T lệch phải, nhưng T1 lại lệch trái.<br>→ Bước 1: rotateLL(T->Right). Bước 2: rotateRR(T).</p>
+    </div>
+  </div>
+<pre><code><span class="cm">/* ===== PHÉP XOAY LL (xoay phải tại T) — tr. 181 ===== */</span>
+<span class="kw">void</span> <span class="fn">rotateLL</span>(<span class="ty">AVLNode</span>** T) {
+    <span class="ty">AVLNode</span>* T1 = (*T)->Left;
+    (*T)->Left   = T1->Right;
+    T1->Right    = *T;
+    <span class="kw">switch</span> (T1->balFactor) {
+        <span class="kw">case</span> LH: (*T)->balFactor = EH; T1->balFactor = EH; <span class="kw">break</span>;
+        <span class="kw">case</span> EH: (*T)->balFactor = LH; T1->balFactor = RH; <span class="kw">break</span>;
+    }
+    *T = T1;
+}
+
+<span class="cm">/* ===== PHÉP XOAY RR (xoay trái tại T) — tr. 186 ===== */</span>
+<span class="kw">void</span> <span class="fn">rotateRR</span>(<span class="ty">AVLNode</span>** T) {
+    <span class="ty">AVLNode</span>* T1 = (*T)->Right;
+    (*T)->Right  = T1->Left;
+    T1->Left     = *T;
+    <span class="kw">switch</span> (T1->balFactor) {
+        <span class="kw">case</span> RH: (*T)->balFactor = EH; T1->balFactor = EH; <span class="kw">break</span>;
+        <span class="kw">case</span> EH: (*T)->balFactor = RH; T1->balFactor = LH; <span class="kw">break</span>;
+    }
+    *T = T1;
+}
+
+<span class="cm">/* ===== PHÉP XOAY LR (xoay kép: trái T1 rồi phải T) — tr. 182 ===== */</span>
+<span class="kw">void</span> <span class="fn">rotateLR</span>(<span class="ty">AVLNode</span>** T) {
+    <span class="ty">AVLNode</span>* T1 = (*T)->Left;
+    <span class="ty">AVLNode</span>* T2 = T1->Right;
+    T1->Right    = T2->Left;
+    T2->Left     = T1;
+    (*T)->Left   = T2->Right;
+    T2->Right    = *T;
+    <span class="kw">switch</span> (T2->balFactor) {
+        <span class="kw">case</span> LH: (*T)->balFactor = RH; T1->balFactor = EH; <span class="kw">break</span>;
+        <span class="kw">case</span> EH: (*T)->balFactor = EH; T1->balFactor = EH; <span class="kw">break</span>;
+        <span class="kw">case</span> RH: (*T)->balFactor = EH; T1->balFactor = LH; <span class="kw">break</span>;
+    }
+    T2->balFactor = EH;
+    *T = T2;
+}
+
+<span class="cm">/* ===== PHÉP XOAY RL (xoay kép: phải T1 rồi trái T) — tr. 184 ===== */</span>
+<span class="kw">void</span> <span class="fn">rotateRL</span>(<span class="ty">AVLNode</span>** T) {
+    <span class="ty">AVLNode</span>* T1 = (*T)->Right;
+    <span class="ty">AVLNode</span>* T2 = T1->Left;
+    T1->Left     = T2->Right;
+    T2->Right    = T1;
+    (*T)->Right  = T2->Left;
+    T2->Left     = *T;
+    <span class="kw">switch</span> (T2->balFactor) {
+        <span class="kw">case</span> RH: (*T)->balFactor = LH; T1->balFactor = EH; <span class="kw">break</span>;
+        <span class="kw">case</span> EH: (*T)->balFactor = EH; T1->balFactor = EH; <span class="kw">break</span>;
+        <span class="kw">case</span> LH: (*T)->balFactor = EH; T1->balFactor = RH; <span class="kw">break</span>;
+    }
+    T2->balFactor = EH;
+    *T = T2;
+}</code></pre>
+  <div class="note"><b>📌 C dùng con trỏ cấp 2 (AVLNode**)</b>
+  Trong C không dùng tham chiếu kiểu C++. Để hàm thay đổi được con trỏ gốc (T), phải truyền địa chỉ của con trỏ: <code>AVLNode**</code>. Gọi: <code>rotateLL(&root)</code>.</div>
+</div>
+
+<!-- AVL Ví dụ vẽ cây 1 -->
+<div class="card">
+  <div class="card-h"><span class="qn">Bài 3.1</span><h3>Vẽ cây AVL: Thêm 50, 75, 85, 30, 10, 45, 80, 98 — Xóa 50, 30</h3></div>
+
+  <h4>▶ Thêm 50, 75, 85 → mất cân bằng RR tại 50</h4>
+<div class="tree">Thêm 85 làm cây lệch phải tại 50:
+
+    50
+      \
+      75
+        \
+        85
+
+<span class="rl">RR tại 50</span> = xoay trái tại 50:
+      75
+     /  \
+    50   85</div>
+
+  <h4>▶ Thêm 30, 10 → mất cân bằng LL tại 50</h4>
+<div class="tree">Trước xoay:
+        75
+       /  \
+      50   85
+     /
+    30
+   /
+  10
+
+<span class="rl">LL tại 50</span> = xoay phải tại 50:
+        75
+       /  \
+      30   85
+     /  \
+    10   50</div>
+
+  <h4>▶ Thêm 45 → mất cân bằng LR tại 75</h4>
+<div class="tree">Trước xoay:
+        75
+       /  \
+      30   85
+     /  \
+    10   50
+         /
+        45
+
+<span class="rl">LR tại 75</span>: xoay trái tại 30, sau đó xoay phải tại 75.
+        50
+       /  \
+      30   75
+     /  \    \
+    10  45   85</div>
+
+  <h4>▶ Thêm 80 → mất cân bằng RL tại 75</h4>
+<div class="tree">Trước xoay:
+        50
+       /  \
+      30   75
+     / \     \
+    10 45    85
+             /
+            80
+
+<span class="rl">RL tại 75</span>: xoay phải tại 85, sau đó xoay trái tại 75.
+        50
+       /  \
+      30   80
+     / \   / \
+    10 45 75 85</div>
+
+  <h4>▶ Thêm 98 → cây vẫn cân bằng</h4>
+<div class="tree">        50
+       /  \
+      30   80
+     / \   / \
+    10 45 75 85
+               \
+               98</div>
+
+  <h4>▶ Xóa 50 → thay bằng Min nhánh phải = 75, sau đó mất cân bằng RR tại 80</h4>
+<div class="tree">Sau khi thay 50 bằng 75 và xóa 75 cũ:
+        75
+       /  \
+      30   80
+     / \     \
+    10 45    85
+               \
+               98
+
+Kiểm tra tại 80: nhánh phải cao hơn nhánh trái 2 mức → <span class="rl">RR tại 80</span>.
+Xoay trái tại 80:
+        75
+       /  \
+      30   85
+     / \   / \
+    10 45 80 98</div>
+
+  <h4>▶ Xóa 30 → thay bằng Min nhánh phải = 45, không cần xoay</h4>
+<div class="tree">Xóa 30, thay bằng 45:
+        75
+       /  \
+      45   85
+     /    /  \
+    10   80  98
+
+Cây cân bằng: không cần xoay thêm.</div>
+
+  <div class="note"><b>✅ Điểm đã sửa:</b> Phép xoay RR tại 80 xảy ra ngay sau khi xóa 50, không phải sau khi xóa 30. Đây là bước cần ghi đúng trong bài thi.</div>
+</div>
+
+<!-- AVL bài 2 -->
+<div class="card">
+  <div class="card-h"><span class="qn">Bài 3.2</span><h3>Vẽ cây AVL: 15, 35, 26, 18, 22, 42, 10, 12, 5 — Xóa 15, 18</h3></div>
+
+  <h4>▶ Thêm 15, 35, 26 → mất cân bằng RL tại 15</h4>
+<div class="tree">Trước xoay:
+    15
+      \
+      35
+      /
+     26
+
+<span class="rl">RL tại 15</span>: xoay phải tại 35, sau đó xoay trái tại 15.
+      26
+     /  \
+    15   35</div>
+
+  <h4>▶ Thêm 18, 22 → mất cân bằng RR tại 15</h4>
+<div class="tree">Sau thêm 18 và 22:
+      26
+     /  \
+    15   35
+      \
+      18
+        \
+        22
+
+Nút 15 lệch phải-phải → <span class="rl">RR tại 15</span>.
+Sau xoay trái tại 15:
+      26
+     /  \
+    18   35
+   /  \
+  15  22</div>
+
+  <h4>▶ Thêm 42, 10 → cây vẫn cân bằng</h4>
+<div class="tree">      26
+     /  \
+    18   35
+   /  \    \
+  15  22   42
+ /
+10</div>
+
+  <h4>▶ Thêm 12 → mất cân bằng LR tại 15</h4>
+<div class="tree">Trước xoay:
+      26
+     /  \
+    18   35
+   /  \    \
+  15  22   42
+ /
+10
+  \
+  12
+
+Nút 15 lệch trái-phải → <span class="rl">LR tại 15</span>.
+Sau xoay trái tại 10, rồi xoay phải tại 15:
+      26
+     /  \
+    18   35
+   /  \    \
+  12  22   42
+ /  \
+10  15</div>
+
+  <h4>▶ Thêm 5 → cây vẫn cân bằng</h4>
+<div class="tree">        26
+       /  \
+      18   35
+     /  \    \
+    12  22   42
+   /  \
+  10  15
+ /
+5</div>
+
+  <h4>▶ Xóa 15 → không cần xoay</h4>
+<div class="tree">        26
+       /  \
+      18   35
+     /  \    \
+    12  22   42
+   /
+  10
+ /
+5</div>
+
+  <h4>▶ Xóa 18 → thay bằng Min nhánh phải = 22, không cần xoay</h4>
+<div class="tree">        26
+       /  \
+      22   35
+     /       \
+    12       42
+   /
+  10
+ /
+5
+
+Cây vẫn thỏa điều kiện AVL.</div>
+
+  <div class="warn"><b>⚠ Điểm đã sửa:</b> Sau khi thêm 22, mất cân bằng xảy ra tại nút 15 theo dạng RR, không phải LR tại 26. Dãy này có các phép RL, RR, LR trong quá trình thêm; không nên ghi sai vị trí nút mất cân bằng.</div>
+</div>
+
+<!-- ======================================================= -->
+<!-- § 4: BẢNG BĂM -->
+<!-- ======================================================= -->
+<div id="hash" class="sec">
+  <div class="secn s4">4</div>
+  <div><h2>Bảng băm (Hash Table)</h2>
+  <span class="tag tag3">Chaining</span><span class="tag tag3">Coalesced</span><span class="tag tag3">Linear Probing</span></div>
+</div>
+
+<!-- Lý thuyết so sánh -->
+<div class="card">
+  <div class="card-h"><span class="qn">Lý thuyết</span><h3>Khái niệm + So sánh 3 phương pháp xử lý va chạm (CLO2 — 4 ý × 0.25đ)</h3></div>
+  <p class="p"><b>Bảng băm</b> là cấu trúc dùng hàm băm h(k) để ánh xạ khóa k thành chỉ số trong mảng. Lý tưởng mỗi khóa có chỉ số riêng, nhưng thực tế nhiều khóa cùng chỉ số → <b>va chạm (collision)</b>.</p>
+  <p class="p"><b>Phân cụm (Clustering)</b>: Hiện tượng các phần tử va chạm tích tụ thành dãy liên tiếp, làm tăng chi phí tìm kiếm.</p>
+  <div class="tw">
+  <table>
+    <tr><th>Tiêu chí</th><th>Kết nối trực tiếp<br>(Direct Chaining)</th><th>Kết nối hợp nhất<br>(Coalesced)</th><th>Dò tuyến tính<br>(Linear Probing)</th></tr>
+    <tr><td class="tl">Cấu trúc lưu trữ</td><td>Mảng con trỏ + DSLK bên ngoài</td><td>Mảng tĩnh, cột Next nội bộ</td><td>Mảng tĩnh đơn giản</td></tr>
+    <tr><td class="tl">Khi va chạm</td><td>Thêm vào cuối DSLK tương ứng</td><td>Tìm ô trống từ cuối bảng lên, cập nhật Next</td><td>Dò tuyến tính +1 (mod m) đến ô trống</td></tr>
+    <tr><td class="tl">Phân cụm</td><td class="hl">Không phân cụm tuyến tính nhưng có thể dồn vào một bucket</td><td class="hl">Có thể có chuỗi nội bộ</td><td class="rd">Phân cụm sơ cấp nặng</td></tr>
+    <tr><td class="tl">Bộ nhớ</td><td>Con trỏ ngoài, tốn thêm RAM</td><td>Tiết kiệm — nội tuyến</td><td>Tối thiểu</td></tr>
+    <tr><td class="tl">Xóa phần tử</td><td class="gr">Dễ (xóa node DSLK)</td><td>Phức tạp hơn</td><td class="rd">Phải đánh dấu DELETED</td></tr>
+    <tr><td class="tl">Phù hợp khi</td><td>Xóa nhiều, nhiều va chạm</td><td>Bộ nhớ cố định, ít xóa</td><td>Tải thấp (&lt;70%), ít xóa</td></tr>
+  </table>
+  </div>
+  <div class="warn"><b>⚠ Trả lời CLO2 về ưu điểm từng phương pháp:</b>
+  <b>Chaining</b>: linh hoạt vì mỗi bucket có thể chứa nhiều phần tử bằng DSLK, nhưng nếu nhiều khóa rơi vào cùng bucket thì tìm kiếm vẫn có thể giảm về O(n). <b>Coalesced</b>: tiết kiệm bộ nhớ vì quản lý liên kết bằng cột Next trong cùng một mảng, nhưng thao tác xóa phức tạp. <b>Linear Probing</b>: đơn giản và tận dụng ô nhớ liên tiếp, nhưng dễ bị phân cụm sơ cấp; nên dùng khi hệ số tải thấp.</div>
+</div>
+
+
+<!-- MẪU TRÌNH BÀY TRÊN GIẤY THI -->
+<div id="paper-exam" class="card" style="border-color:rgba(210,153,34,.45);background:rgba(210,153,34,.035)">
+  <div class="card-h"><span class="qn">Mẫu giấy thi</span><h3>Mẫu trình bày trên giấy thi — Câu 4 Bảng băm</h3></div>
+  <p class="p"><b>Mục tiêu:</b> Khi thi tự luận, sinh viên không cần mô tả dài như phần mô phỏng. Bài làm nên đi theo khung: <b>công thức → bảng tính h(k) → xử lý va chạm → bảng kết quả cuối → kết luận ngắn</b>.</p>
+  <div class="warn"><b>⚠ Nguyên tắc làm bài:</b> Luôn chèn đúng theo thứ tự đề cho. Linear Probing phải ghi rõ dò vòng bằng modulo. Coalesced phải cập nhật đúng cột <code>Next</code>. Double Hashing là phần mở rộng theo đề ôn tập, không ghi là phương pháp chính trong giáo trình.</div>
+
+  <h4>1) Mẫu Chaining / Kết nối trực tiếp</h4>
+<pre><code>Đề: h(k) = k mod 5. Chèn: 12, 29, 13, 15, 27, 34, 7.
+
+Tính h(k):
+k:     12   29   13   15   27   34   7
+h(k):   2    4    3    0    2    4   2
+
+Bảng kết quả:
+bucket[0] → 15 → NULL
+bucket[1] → NULL
+bucket[2] → 12 → 27 → 7 → NULL
+bucket[3] → 13 → NULL
+bucket[4] → 29 → 34 → NULL
+
+Kết luận: Các khóa có cùng h(k) được nối vào cùng DSLK.</code></pre>
+  <div class="note"><b>Quy ước vẽ:</b> Bucket là con trỏ Head. Trên giấy có thể vẽ rút gọn, nhưng nên ghi đủ mũi tên và NULL cuối chuỗi.</div>
+
+  <h4>2) Mẫu Linear Probing / Dò tuyến tính</h4>
+<pre><code>Đề: h(k) = k mod 7. Chèn: 10, 17, 24, 3, 31.
+Quy tắc dò: nếu slot bị chiếm thì xét lần lượt (h(k)+i) mod 7.
+
+k    h(k)   Quá trình dò                  Slot chèn
+10    3     slot 3 trống                  3
+17    3     3 bị chiếm → 4 trống          4
+24    3     3,4 bị chiếm → 5 trống        5
+3     3     3,4,5 bị chiếm → 6 trống      6
+31    3     3,4,5,6 bị chiếm → 0 trống    0
+
+Bảng cuối:
+slot: 0   1   2   3   4   5   6
+key: 31   -   -  10  17  24   3</code></pre>
+
+  <h4>3) Mẫu Coalesced Hashing / Kết nối hợp nhất</h4>
+<pre><code>Đề: h(k) = k mod 5. Chèn: 12, 22, 15, 27, 7.
+Quy tắc: h(k) trống thì chèn tại h(k); nếu va chạm thì tìm ô trống từ cuối bảng lên, rồi cập nhật Next.
+
+k    h(k)   Xử lý                                      Slot
+12    2     slot 2 trống                              2
+22    2     slot 2 bị chiếm, lấy ô trống cuối: 4       4, Next[2]=4
+15    0     slot 0 trống                              0
+27    2     đi chuỗi 2→4, lấy ô trống cuối: 3          3, Next[4]=3
+7     2     đi chuỗi 2→4→3, lấy ô trống cuối: 1        1, Next[3]=1
+
+Bảng cuối:
+Slot | Key | Next
+0    | 15  | -1
+1    | 7   | -1
+2    | 12  | 4
+3    | 27  | 1
+4    | 22  | 3
+
+Chuỗi bucket 2: 2(12) → 4(22) → 3(27) → 1(7) → NULL.</code></pre>
+
+  <h4>4) Mẫu Double Hashing / Băm kép — mở rộng theo đề ôn tập</h4>
+<pre><code>Đề: h1(k)=k mod 7, h2(k)=5−(k mod 5). Chèn: 10, 17, 24, 31, 38.
+Công thức dò: H(k,i) = (h1(k) + i*h2(k)) mod 7.
+
+k    h1   h2   Quá trình dò              Slot
+10    3    5   slot 3 trống              3
+17    3    3   3 bị → (3+1*3)%7=6        6
+24    3    1   3 bị → (3+1*1)%7=4        4
+31    3    4   3 bị → (3+1*4)%7=0        0
+38    3    2   3 bị → (3+1*2)%7=5        5
+
+Bảng cuối:
+slot: 0   1   2   3   4   5   6
+key: 31   -   -  10  24  38  17
+
+Kết luận: Băm kép dùng bước dò h2(k), giúp giảm phân cụm sơ cấp so với dò tuyến tính.</code></pre>
+</div>
+
+
+<!-- Bài 4.1 Chaining -->
+<div class="card">
+  <div class="card-h"><span class="qn">Bài 4.1</span><h3>Kết nối trực tiếp (Chaining): h(k) = k mod 5. Chèn: 12, 29, 13, 15, 27, 34, 7</h3></div>
+  <p class="p">Tính h(k): 12%5=<b>2</b>, 29%5=<b>4</b>, 13%5=<b>3</b>, 15%5=<b>0</b>, 27%5=<b>2</b>, 34%5=<b>4</b>, 7%5=<b>2</b></p>
+  <div class="tw">
+  <table>
+    <tr><th>Bucket</th><th>Danh sách liên kết (theo thứ tự chèn)</th><th>Số phần tử</th></tr>
+    <tr><td class="hl">0</td><td class="tl">[ 15 ] → NULL</td><td>1</td></tr>
+    <tr><td>1</td><td class="tl">NULL (trống)</td><td>0</td></tr>
+    <tr><td class="hl">2</td><td class="tl rd">[ 12 ] → [ 27 ] → [ 7 ] → NULL &nbsp; (3 phần tử va chạm!)</td><td>3</td></tr>
+    <tr><td class="hl">3</td><td class="tl">[ 13 ] → NULL</td><td>1</td></tr>
+    <tr><td class="hl">4</td><td class="tl rd">[ 29 ] → [ 34 ] → NULL &nbsp; (va chạm)</td><td>2</td></tr>
+  </table>
+  </div>
+  <div class="note"><b>Cách vẽ trên giấy thi:</b> Vẽ mảng 5 ô dọc (0→4), từ mỗi ô kéo mũi tên sang phải thành DSLK. Ghi rõ NULL ở cuối mỗi chuỗi.</div>
+</div>
+
+<!-- Bài 4.2 Linear Probing -->
+<div class="card">
+  <div class="card-h"><span class="qn">Bài 4.2</span><h3>Dò tuyến tính (Linear Probing): h(k) = k mod 7. Chèn: 10, 17, 24, 3, 31</h3></div>
+  <p class="p">h(k): 10%7=<b>3</b>, 17%7=<b>3</b>✗, 24%7=<b>3</b>✗, 3%7=<b>3</b>✗, 31%7=<b>3</b>✗ → Tất cả h=3, va chạm liên tục!</p>
+  <p class="p">Quy tắc dò: h'(k,i) = (h(k) + i) mod m với i=1,2,3...</p>
+  <div class="tw">
+  <table>
+    <tr><th>Khóa</th><th>h(k)</th><th>Slot dò 1</th><th>Slot dò 2</th><th>Slot dò 3</th><th>Slot dò 4</th><th>Slot chèn</th></tr>
+    <tr><td>10</td><td class="hl">3</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="gr">3</td></tr>
+    <tr><td>17</td><td class="rd">3 bị chiếm</td><td>4 trống</td><td>—</td><td>—</td><td>—</td><td class="gr">4</td></tr>
+    <tr><td>24</td><td class="rd">3 bị</td><td class="rd">4 bị</td><td>5 trống</td><td>—</td><td>—</td><td class="gr">5</td></tr>
+    <tr><td>3</td><td class="rd">3 bị</td><td class="rd">4 bị</td><td class="rd">5 bị</td><td>6 trống</td><td>—</td><td class="gr">6</td></tr>
+    <tr><td>31</td><td class="rd">3 bị</td><td class="rd">4 bị</td><td class="rd">5 bị</td><td class="rd">6 bị</td><td>(3+4)%7=0 trống</td><td class="gr">0</td></tr>
+  </table>
+  </div>
+  <div class="tw" style="margin-top:12px">
+  <table>
+    <tr><th>Slot</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr>
+    <tr><td><b>Key</b></td><td class="rd">31</td><td></td><td></td><td class="hl">10</td><td class="hl">17</td><td class="hl">24</td><td class="hl">3</td></tr>
+  </table>
+  </div>
+  <div class="err"><b>⚠ Phân cụm sơ cấp cực đoan:</b> 5 phần tử tập trung slot 0,3,4,5,6 (liền tiếp). Phần tử tiếp theo có h(k)=3,4,5,6 đều phải dò qua chuỗi dài → chi phí tìm kiếm O(n) thay vì O(1).</div>
+</div>
+
+<!-- Bài 4.3 Coalesced -->
+<div class="card">
+  <div class="card-h"><span class="qn">Bài 4.3</span><h3>Kết nối hợp nhất (Coalesced): h(k) = k mod 5. Chèn: 12, 22, 15, 27, 7</h3></div>
+  <p class="p">h(k): 12%5=<b>2</b>, 22%5=<b>2</b>✗, 15%5=<b>0</b>, 27%5=<b>2</b>✗, 7%5=<b>2</b>✗</p>
+  <p class="p"><b>Quy tắc Coalesced:</b> Va chạm → tìm ô trống từ <em>cuối bảng (slot MAXSIZE-1) đi ngược lên đầu</em>. Cập nhật cột Next ở ô cuối chuỗi trỏ đến ô mới.</p>
+  <div class="tw">
+  <table>
+    <tr><th>Thứ tự chèn</th><th>Khóa</th><th>h(k)</th><th>Slot được đặt</th><th>Cập nhật Next</th></tr>
+    <tr><td>1</td><td>12</td><td>2</td><td class="gr">2</td><td>Next[2] = -1 (chưa có gì)</td></tr>
+    <tr><td>2</td><td>22</td><td class="rd">2 bị chiếm</td><td class="gr">4 (tìm từ cuối: slot 4 trống)</td><td>Next[2] = 4</td></tr>
+    <tr><td>3</td><td>15</td><td>0</td><td class="gr">0</td><td>Next[0] = -1</td></tr>
+    <tr><td>4</td><td>27</td><td class="rd">2 bị → Next=4, slot 4 bị</td><td class="gr">3 (slot 3 trống)</td><td>Next[4] = 3</td></tr>
+    <tr><td>5</td><td>7</td><td class="rd">2→4→3 đều bị</td><td class="gr">1 (slot 1 trống)</td><td>Next[3] = 1</td></tr>
+  </table>
+  </div>
+  <div class="tw" style="margin-top:12px">
+  <table>
+    <tr><th>Slot</th><th>Key</th><th>Next</th><th>Ghi chú</th></tr>
+    <tr><td>0</td><td class="hl">15</td><td>-1</td><td class="tl">h(15)=0, chèn thẳng</td></tr>
+    <tr><td>1</td><td class="hl">7</td><td>-1</td><td class="tl">va chạm → ô trống cuối cùng tìm được</td></tr>
+    <tr><td>2</td><td class="hl">12</td><td class="gr">4</td><td class="tl">h(12)=2, head chuỗi</td></tr>
+    <tr><td>3</td><td class="hl">27</td><td class="gr">1</td><td class="tl">va chạm, ô trống = 3</td></tr>
+    <tr><td>4</td><td class="hl">22</td><td class="gr">3</td><td class="tl">va chạm đầu tiên từ slot 2</td></tr>
+  </table>
+  </div>
+  <p class="p">Chuỗi tra cứu khóa h=2: slot 2 (12) → Next=4 → slot 4 (22) → Next=3 → slot 3 (27) → Next=1 → slot 1 (7) → Next=-1.</p>
+</div>
+
+<!-- Bài 4.4 Linear Probing -->
+<div class="card">
+  <div class="card-h"><span class="qn">Bài 4.4</span><h3>Dò tuyến tính: h(k) = k mod 7. Chèn: 8, 15, 22, 29, 36</h3></div>
+  <p class="p">h(k): 8%7=<b>1</b>, 15%7=<b>1</b>✗, 22%7=<b>1</b>✗, 29%7=<b>1</b>✗, 36%7=<b>1</b>✗</p>
+  <p class="p">Chèn: 8→1, 15→2, 22→3, 29→4, 36→5</p>
+  <div class="tw">
+  <table>
+    <tr><th>Slot</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr>
+    <tr><td><b>Key</b></td><td></td><td class="hl">8</td><td class="hl">15</td><td class="hl">22</td><td class="hl">29</td><td class="hl">36</td><td></td></tr>
+  </table>
+  </div>
+  <div class="warn"><b>Phân cụm sơ cấp:</b> Chuỗi 1→5 liên tiếp. Phần tử tiếp theo có h(k) bất kỳ trong {1,2,3,4,5} đều bị ảnh hưởng.</div>
+</div>
+
+<!-- Bài 4.5 LP hoán đổi thứ tự -->
+<div class="card">
+  <div class="card-h"><span class="qn">Bài 4.5</span><h3>Dò tuyến tính: h(k) = k mod 7. Chèn: 15, 22, 29, 36, 8 (thứ tự khác 4.4)</h3></div>
+  <p class="p">h(k) giống bài 4.4, chỉ đổi thứ tự: 15→1, 22→2, 29→3, 36→4, 8→(1 bị→2 bị→3 bị→4 bị→5)</p>
+  <div class="tw">
+  <table>
+    <tr><th>Slot</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr>
+    <tr><td><b>Key</b></td><td></td><td class="hl">15</td><td class="hl">22</td><td class="hl">29</td><td class="hl">36</td><td class="hl">8</td><td></td></tr>
+  </table>
+  </div>
+  <div class="note"><b>Nhận xét đã chỉnh:</b> Hai bài 4.4 và 4.5 có cùng tập slot bị chiếm là 1–5, nhưng khóa nằm trong từng slot khác nhau. Linear Probing <b>phụ thuộc vào thứ tự chèn</b>, nên khi làm bài phải mô phỏng đúng thứ tự đề cho.</div>
+</div>
+
+<!-- Bài 4.6 Coalesced -->
+<div class="card">
+  <div class="card-h"><span class="qn">Bài 4.6</span><h3>Kết nối hợp nhất: h(k) = k mod 5. Chèn: 12, 18, 24, 30, 6</h3></div>
+  <p class="p">h(k): 12%5=<b>2</b>, 18%5=<b>3</b>, 24%5=<b>4</b>, 30%5=<b>0</b>, 6%5=<b>1</b> → Tất cả khác nhau, không va chạm!</p>
+  <div class="tw">
+  <table>
+    <tr><th>Slot</th><th>Key</th><th>Next</th></tr>
+    <tr><td>0</td><td class="gr">30</td><td>-1</td></tr>
+    <tr><td>1</td><td class="gr">6</td><td>-1</td></tr>
+    <tr><td>2</td><td class="gr">12</td><td>-1</td></tr>
+    <tr><td>3</td><td class="gr">18</td><td>-1</td></tr>
+    <tr><td>4</td><td class="gr">24</td><td>-1</td></tr>
+  </table>
+  </div>
+  <div class="note"><b>✅ Không có va chạm:</b> Đây là trường hợp lý tưởng. Mỗi phần tử nằm đúng slot h(k), Next=-1 tất cả.</div>
+</div>
+
+<!-- Bài 4.7 Double Hashing -->
+<div class="card">
+  <div class="card-h"><span class="qn">Bài 4.7</span><h3>Băm kép: h₁(k)=k mod 7, h₂(k)=5−(k mod 5). Chèn: 10, 17, 24, 31, 38</h3></div>
+  <p class="p"><b>Nguồn:</b> Đây là dạng mở rộng theo đề ôn tập; giáo trình gốc tập trung vào kết nối trực tiếp, kết nối hợp nhất và dò tuyến tính.</p>
+  <p class="p">Công thức: <code>slot(k,i) = (h₁(k) + i × h₂(k)) mod 7</code></p>
+  <div class="tw">
+  <table>
+    <tr><th>k</th><th>h₁(k)</th><th>h₂(k)</th><th>i=0 (h₁)</th><th>i=1 → slot</th><th>Slot chèn</th></tr>
+    <tr><td>10</td><td>3</td><td>5-0=5</td><td>slot 3 trống</td><td>—</td><td class="gr">3</td></tr>
+    <tr><td>17</td><td>3</td><td>5-2=3</td><td class="rd">slot 3 bị</td><td>(3+3)%7=6</td><td class="gr">6</td></tr>
+    <tr><td>24</td><td>3</td><td>5-4=1</td><td class="rd">slot 3 bị</td><td>(3+1)%7=4</td><td class="gr">4</td></tr>
+    <tr><td>31</td><td>3</td><td>5-1=4</td><td class="rd">slot 3 bị</td><td>(3+4)%7=0</td><td class="gr">0</td></tr>
+    <tr><td>38</td><td>3</td><td>5-3=2</td><td class="rd">slot 3 bị</td><td>(3+2)%7=5</td><td class="gr">5</td></tr>
+  </table>
+  </div>
+  <div class="tw" style="margin-top:10px">
+  <table>
+    <tr><th>Slot</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr>
+    <tr><td><b>Key</b></td><td class="gr">31</td><td></td><td></td><td class="gr">10</td><td class="gr">24</td><td class="gr">38</td><td class="gr">17</td></tr>
+  </table>
+  </div>
+  <div class="note"><b>✅ Ưu điểm băm kép:</b> Mặc dù tất cả h₁(k)=3, nhưng mỗi phần tử có bước dò h₂ khác nhau (5, 3, 1, 4, 2) → phân tán đều sang 5 slot khác nhau. Giảm phân cụm hiệu quả hơn Linear Probing.</div>
+</div>
+
+<!-- Bài 4.8 Chaining cực đoan -->
+<div class="card">
+  <div class="card-h"><span class="qn">Bài 4.8</span><h3>Chaining h(k)=k mod 7: Chèn 14, 21, 28, 35, 42 — Phân cụm cực đoan</h3></div>
+  <p class="p">h(k): 14%7=<b>0</b>, 21%7=<b>0</b>, 28%7=<b>0</b>, 35%7=<b>0</b>, 42%7=<b>0</b> → TẤT CẢ về bucket 0!</p>
+  <div class="tw">
+  <table>
+    <tr><th>Bucket</th><th>Danh sách liên kết</th></tr>
+    <tr><td class="rd">0</td><td class="tl rd">14 → 21 → 28 → 35 → 42 → NULL &nbsp; (5 phần tử!)</td></tr>
+    <tr><td>1–6</td><td class="tl">NULL (trống hết)</td></tr>
+  </table>
+  </div>
+  <div class="err"><b>⚠ Worst case của Chaining:</b> Tìm kiếm degrades to O(n) — phải duyệt toàn bộ DSLK. Nguyên nhân: tập khóa là bội số của m=7. Giải pháp: chọn m là số nguyên tố không chia hết cho công bội của khóa.</div>
+</div>
+
+<!-- Bài 4.9 Coalesced m=7 -->
+<div class="card">
+  <div class="card-h"><span class="qn">Bài 4.9</span><h3>Kết nối hợp nhất: h(k) = k mod 7. Chèn: 5, 12, 19, 26, 33</h3></div>
+  <p class="p">h(k): 5%7=<b>5</b>, 12%7=<b>5</b>✗, 19%7=<b>5</b>✗, 26%7=<b>5</b>✗, 33%7=<b>5</b>✗</p>
+  <p class="p">Tìm ô trống từ slot 6 ngược lên: 6, 5 bị, chọn 6 → 5 (1st va chạm 12), 4 → 12 (2nd, 19), 3 → 19 (3rd, 26), 2 → 26 (4th, 33)</p>
+  <div class="tw">
+  <table>
+    <tr><th>Slot</th><th>Key</th><th>Next</th></tr>
+    <tr><td>0</td><td>—</td><td>-1</td></tr>
+    <tr><td>1</td><td>—</td><td>-1</td></tr>
+    <tr><td class="hl">2</td><td class="hl">33</td><td>-1</td></tr>
+    <tr><td class="hl">3</td><td class="hl">26</td><td>2</td></tr>
+    <tr><td class="hl">4</td><td class="hl">19</td><td>3</td></tr>
+    <tr><td class="hl">5</td><td class="hl">5</td><td>6</td></tr>
+    <tr><td class="hl">6</td><td class="hl">12</td><td>4</td></tr>
+  </table>
+  </div>
+  <p class="p">Chuỗi tra cứu bucket 5: slot 5 (key=5) → Next=6 → slot 6 (key=12) → Next=4 → slot 4 (key=19) → Next=3 → slot 3 (key=26) → Next=2 → slot 2 (key=33) → Next=-1.</p>
+</div>
+
+<!-- Bài 4.10 Double Hashing -->
+<div class="card">
+  <div class="card-h"><span class="qn">Bài 4.10</span><h3>Băm kép: h₁(k)=k mod 5, h₂(k)=3−(k mod 3). Chèn: 12, 17, 22, 27, 32</h3></div>
+  <p class="p"><b>Nguồn:</b> Đây là dạng mở rộng theo đề ôn tập; không phải trọng tâm cài đặt chính trong giáo trình gốc.</p>
+  <p class="p">h₁(k): 12%5=<b>2</b>, 17%5=<b>2</b>✗, 22%5=<b>2</b>✗, 27%5=<b>2</b>✗, 32%5=<b>2</b>✗ → h₁ đều bằng 2</p>
+  <p class="p">h₂(k): 12%3=0→3-0=<b>3</b>, 17%3=2→3-2=<b>1</b>, 22%3=1→3-1=<b>2</b>, 27%3=0→3-0=<b>3</b>, 32%3=2→3-2=<b>1</b></p>
+  <div class="tw">
+  <table>
+    <tr><th>k</th><th>h₁</th><th>h₂</th><th>i=0</th><th>i=1</th><th>i=2</th><th>Slot</th></tr>
+    <tr><td>12</td><td>2</td><td>3</td><td>slot 2 trống</td><td>—</td><td>—</td><td class="gr">2</td></tr>
+    <tr><td>17</td><td>2</td><td>1</td><td class="rd">2 bị</td><td>(2+1)%5=3</td><td>—</td><td class="gr">3</td></tr>
+    <tr><td>22</td><td>2</td><td>2</td><td class="rd">2 bị</td><td>(2+2)%5=4</td><td>—</td><td class="gr">4</td></tr>
+    <tr><td>27</td><td>2</td><td>3</td><td class="rd">2 bị</td><td>(2+3)%5=0</td><td>—</td><td class="gr">0</td></tr>
+    <tr><td>32</td><td>2</td><td>1</td><td class="rd">2 bị</td><td class="rd">(2+1)=3 bị</td><td>(2+2×1)%5=4 bị? → (2+3×1)%5=0 bị? → (2+4×1)%5=1</td><td class="gr">1</td></tr>
+  </table>
+  </div>
+  <div class="tw" style="margin-top:10px">
+  <table>
+    <tr><th>Slot</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th></tr>
+    <tr><td><b>Key</b></td><td class="gr">27</td><td class="gr">32</td><td class="gr">12</td><td class="gr">17</td><td class="gr">22</td></tr>
+  </table>
+  </div>
+</div>
+
+
+<div class="card">
+  <div class="card-h"><span class="qn">Ứng dụng</span><h3>Sửa cách diễn đạt một số ví dụ Hash Table trong thực tế</h3></div>
+  <ul class="ul">
+    <li><b>Mật khẩu website:</b> không gọi là “mã hóa mật khẩu bằng hash”. Nên viết: lưu <b>giá trị băm một chiều</b> của mật khẩu, thường kèm salt và thuật toán băm mật khẩu chuyên dụng.</li>
+    <li><b>Blockchain:</b> dùng hàm băm để liên kết và kiểm tra toàn vẹn các block theo chuỗi. Đây là <b>chuỗi liên kết bằng hash</b>, không phải Hash Table theo nghĩa bảng băm.</li>
+    <li><b>Chaining:</b> không phải “hiệu suất không giảm khi bảng đầy”. Nếu một bucket có danh sách quá dài, thao tác tìm kiếm vẫn có thể là O(n).</li>
+  </ul>
+</div>
+
+
+<!-- ======================================================= -->
+<!-- MÔ PHỎNG MỘT BÀI THI ĐẦY ĐỦ -->
+<!-- ======================================================= -->
+<div id="full-exam" class="sec">
+  <div class="secn s1">Đ</div>
+  <div><h2>Mô phỏng 1 bài thi đầy đủ — 75 phút, 4 câu × 2.5 điểm</h2>
+  <span class="tag">Đề mẫu</span><span class="tag tag2">Bài giải mẫu</span><span class="tag tag3">Cách trình bày giấy thi</span></div>
+</div>
+
+<div class="card" style="border-color:rgba(88,166,255,.35);background:rgba(88,166,255,.035)">
+  <div class="card-h"><span class="qn">Đề thi mẫu</span><h3>Đề mô phỏng đầy đủ — sinh viên làm như một bài thi tự luận</h3></div>
+  <div class="warn"><b>Quy ước làm bài:</b> Tất cả code viết bằng <b>ngôn ngữ C thuần</b>. Không dùng <code>new/delete</code>, không dùng tham chiếu C++ <code>&amp;</code>, không dùng STL. Khi cần sửa danh sách/cây, truyền con trỏ hoặc con trỏ cấp 2.</div>
+  <div class="tw">
+  <table>
+    <tr><th>Câu</th><th>Nội dung đề mẫu</th><th>Điểm</th><th>Thời gian gợi ý</th></tr>
+    <tr><td><b>1</b></td><td class="tl"><b>DSLK đơn số nguyên:</b> Viết hàm đếm phần tử chia hết cho 3; tính trung bình cộng phần tử &gt; 10; tách danh sách thành 2 DSLK chẵn/lẻ.</td><td>2.5</td><td>15 phút</td></tr>
+    <tr><td><b>2</b></td><td class="tl"><b>Stack:</b> Trình bày giải thuật Infix → Postfix và kẻ bảng chuyển biểu thức <code>(2*3-4+2)/(4-2)</code> sang hậu tố.</td><td>2.5</td><td>15 phút</td></tr>
+    <tr><td><b>3</b></td><td class="tl"><b>BST + AVL:</b> Viết hàm đệ quy đếm nút lá tại mức k; vẽ AVL khi thêm <code>15,35,26,18,22,42,10,12,5</code>, sau đó xóa <code>15,18</code>.</td><td>2.5</td><td>25 phút</td></tr>
+    <tr><td><b>4</b></td><td class="tl"><b>Bảng băm:</b> Trình bày Coalesced Hashing; áp dụng <code>h(k)=k mod 5</code>, chèn <code>12,22,15,27,7</code>.</td><td>2.5</td><td>15 phút</td></tr>
+  </table>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-h"><span class="qn">Câu 1</span><h3>Bài giải mẫu — Danh sách liên kết đơn bằng ngôn ngữ C</h3></div>
+  <p class="p"><b>Dữ liệu:</b> Danh sách liên kết đơn lưu số nguyên. Giả sử đề đã cho sẵn <code>SNode</code>, <code>SList</code>, <code>createSNode</code>, <code>insertTail</code>. Khi làm bài, sinh viên chỉ cần viết đúng các hàm xử lý theo yêu cầu.</p>
+<pre><code>/* Câu 1a.1: Đếm số phần tử chia hết cho 3 */
+int demChiaHet3(SList sl) {
+    int dem = 0;
+    SNode *p = sl.Head;
+    while (p != NULL) {
+        if (p-&gt;Info % 3 == 0) dem++;
+        p = p-&gt;Next;
+    }
+    return dem;
+}
+
+/* Câu 1a.2: Tính trung bình cộng các phần tử &gt; 10 */
+float trungBinhLonHon10(SList sl) {
+    int dem = 0;
+    long tong = 0;
+    SNode *p = sl.Head;
+    while (p != NULL) {
+        if (p-&gt;Info &gt; 10) {
+            tong += p-&gt;Info;
+            dem++;
+        }
+        p = p-&gt;Next;
+    }
+    return (dem == 0) ? 0.0f : (float)tong / dem;
+}
+
+/* Câu 1b: Tách danh sách thành danh sách chẵn và danh sách lẻ */
+void tachChanLe(SList sl, SList *slChan, SList *slLe) {
+    SNode *p = sl.Head;
+    initSList(slChan);
+    initSList(slLe);
+
+    while (p != NULL) {
+        SNode *q = createSNode(p-&gt;Info);   /* tạo node mới, không phá danh sách gốc */
+        if (p-&gt;Info % 2 == 0)
+            insertTail(slChan, q);
+        else
+            insertTail(slLe, q);
+        p = p-&gt;Next;
+    }
+}</code></pre>
+  <div class="note"><b>Cách ăn điểm trên giấy:</b> Mở đầu bằng con trỏ <code>SNode *p = sl.Head</code>, duyệt bằng <code>while(p != NULL)</code>, xử lý điều kiện, sau đó <code>p = p-&gt;Next</code>. Với hàm tách danh sách, phải khởi tạo 2 danh sách kết quả trước khi duyệt.</div>
+</div>
+
+<div class="card">
+  <div class="card-h"><span class="qn">Câu 2</span><h3>Bài giải mẫu — Stack, chuyển Infix sang Postfix</h3></div>
+  <h4>2a. Giải thuật bằng lời</h4>
+  <ol class="steps">
+    <li>Đọc biểu thức Infix từ trái sang phải.</li>
+    <li>Gặp toán hạng thì ghi ngay vào chuỗi Postfix.</li>
+    <li>Gặp dấu <code>(</code> thì push vào Stack.</li>
+    <li>Gặp toán tử thì pop các toán tử trên đỉnh Stack có độ ưu tiên lớn hơn hoặc bằng toán tử đang đọc, rồi push toán tử hiện tại.</li>
+    <li>Gặp dấu <code>)</code> thì pop đến khi gặp <code>(</code>; bỏ cặp ngoặc, không ghi ngoặc vào kết quả.</li>
+    <li>Hết biểu thức thì pop toàn bộ toán tử còn lại trong Stack ra kết quả.</li>
+  </ol>
+
+  <h4>2b. Kẻ bảng chuyển <code>(2*3-4+2)/(4-2)</code></h4>
+  <div class="tw">
+  <table>
+    <tr><th>STT</th><th>Ký tự</th><th>Stack</th><th>Postfix</th><th>Thao tác</th></tr>
+    <tr><td>1</td><td>(</td><td>(</td><td></td><td class="tl">Push (</td></tr>
+    <tr><td>2</td><td>2</td><td>(</td><td>2</td><td class="tl">Ghi toán hạng</td></tr>
+    <tr><td>3</td><td>*</td><td>( *</td><td>2</td><td class="tl">Push *</td></tr>
+    <tr><td>4</td><td>3</td><td>( *</td><td>2 3</td><td class="tl">Ghi toán hạng</td></tr>
+    <tr><td>5</td><td>-</td><td>( -</td><td>2 3 *</td><td class="tl">Pop * vì ưu tiên cao hơn -, rồi push -</td></tr>
+    <tr><td>6</td><td>4</td><td>( -</td><td>2 3 * 4</td><td class="tl">Ghi toán hạng</td></tr>
+    <tr><td>7</td><td>+</td><td>( +</td><td>2 3 * 4 -</td><td class="tl">Pop - vì cùng ưu tiên, rồi push +</td></tr>
+    <tr><td>8</td><td>2</td><td>( +</td><td>2 3 * 4 - 2</td><td class="tl">Ghi toán hạng</td></tr>
+    <tr><td>9</td><td>)</td><td>rỗng</td><td>2 3 * 4 - 2 +</td><td class="tl">Pop đến (, bỏ ngoặc</td></tr>
+    <tr><td>10</td><td>/</td><td>/</td><td>2 3 * 4 - 2 +</td><td class="tl">Push /</td></tr>
+    <tr><td>11</td><td>(</td><td>/ (</td><td>2 3 * 4 - 2 +</td><td class="tl">Push (</td></tr>
+    <tr><td>12</td><td>4</td><td>/ (</td><td>2 3 * 4 - 2 + 4</td><td class="tl">Ghi toán hạng</td></tr>
+    <tr><td>13</td><td>-</td><td>/ ( -</td><td>2 3 * 4 - 2 + 4</td><td class="tl">Push -</td></tr>
+    <tr><td>14</td><td>2</td><td>/ ( -</td><td>2 3 * 4 - 2 + 4 2</td><td class="tl">Ghi toán hạng</td></tr>
+    <tr><td>15</td><td>)</td><td>/</td><td>2 3 * 4 - 2 + 4 2 -</td><td class="tl">Pop đến (, bỏ ngoặc</td></tr>
+    <tr><td>16</td><td>EOF</td><td>rỗng</td><td class="gr">2 3 * 4 - 2 + 4 2 - /</td><td class="tl">Pop / còn lại</td></tr>
+  </table>
+  </div>
+  <div class="note"><b>Kết quả Postfix:</b> <code>2 3 * 4 - 2 + 4 2 - /</code>. Khi thi, bắt buộc kẻ bảng; không chỉ ghi đáp án cuối.</div>
+</div>
+
+<div class="card">
+  <div class="card-h"><span class="qn">Câu 3</span><h3>Bài giải mẫu — Đệ quy BST và mô phỏng cây AVL</h3></div>
+  <h4>3a. Viết hàm đệ quy đếm nút lá tại mức k</h4>
+<pre><code>/* Quy ước: gốc ở mức k = 0 */
+int demNutLaTaiMucK(TNode *root, int k) {
+    if (root == NULL) return 0;
+
+    if (k == 0) {
+        if (root-&gt;Left == NULL &amp;&amp; root-&gt;Right == NULL)
+            return 1;
+        return 0;
+    }
+
+    return demNutLaTaiMucK(root-&gt;Left, k - 1)
+         + demNutLaTaiMucK(root-&gt;Right, k - 1);
+}</code></pre>
+  <div class="note"><b>Pattern cần nhớ:</b> Nếu hỏi “tại mức k”, điều kiện dừng là <code>k == 0</code>. Khi đi xuống cây con trái/phải thì truyền <code>k - 1</code>.</div>
+
+  <h4>3b. Vẽ AVL: thêm 15, 35, 26, 18, 22, 42, 10, 12, 5; xóa 15, 18</h4>
+  <div class="tree">Thêm 15, 35, 26:
+    15
+      \
+      35
+      /
+     26
+Mất cân bằng tại 15, dạng RL → xoay phải tại 35, rồi xoay trái tại 15.
+
+      26
+     /  \
+    15   35</div>
+
+  <div class="tree">Thêm 18, 22:
+      26
+     /  \
+    15   35
+      \
+      18
+        \
+        22
+Mất cân bằng tại 15, dạng RR → xoay trái tại 15.
+
+      26
+     /  \
+    18   35
+   /  \
+  15  22</div>
+
+  <div class="tree">Thêm 42, 10:
+      26
+     /  \
+    18   35
+   /  \    \
+  15  22   42
+ /
+10
+Cây vẫn cân bằng.</div>
+
+  <div class="tree">Thêm 12:
+      26
+     /  \
+    18   35
+   /  \    \
+  15  22   42
+ /
+10
+  \
+  12
+Mất cân bằng tại 15, dạng LR → xoay trái tại 10, rồi xoay phải tại 15.
+
+      26
+     /  \
+    18   35
+   /  \    \
+  12  22   42
+ /  \
+10  15</div>
+
+  <div class="tree">Thêm 5:
+        26
+       /  \
+      18   35
+     /  \    \
+    12  22   42
+   /  \
+  10  15
+ /
+5
+Cây vẫn cân bằng.
+
+Xóa 15:
+        26
+       /  \
+      18   35
+     /  \    \
+    12  22   42
+   /
+  10
+ /
+5
+Không cần xoay.
+
+Xóa 18, thay bằng Min nhánh phải = 22:
+        26
+       /  \
+      22   35
+     /       \
+    12       42
+   /
+  10
+ /
+5
+Cây vẫn thỏa điều kiện AVL.</div>
+  <div class="warn"><b>Cách ghi điểm AVL:</b> Ở mỗi bước mất cân bằng phải ghi rõ: “Mất cân bằng tại nút X, dạng LL/RR/LR/RL, thực hiện phép xoay Y”. Chỉ vẽ cây cuối mà không ghi phép xoay sẽ dễ mất điểm trình bày.</div>
+</div>
+
+<div class="card">
+  <div class="card-h"><span class="qn">Câu 4</span><h3>Bài giải mẫu — Bảng băm, Coalesced Hashing</h3></div>
+  <h4>4a. Lý thuyết ngắn gọn</h4>
+  <p class="p"><b>Coalesced Hashing</b> là phương pháp xử lý va chạm trong bảng băm bằng cách lưu phần tử ngay trong mảng băm và dùng thêm cột <code>Next</code> để liên kết các phần tử có cùng địa chỉ băm. Khi va chạm, tìm ô trống từ cuối bảng lên, đặt khóa vào ô trống đó và cập nhật <code>Next</code> của nút cuối chuỗi.</p>
+  <p class="p"><b>Ưu điểm:</b> không cần cấp phát danh sách liên kết ngoài như Chaining; dữ liệu nằm trong một mảng nên tiết kiệm bộ nhớ ngoài và dễ mô phỏng trên giấy. <b>Nhược điểm:</b> thao tác xóa/cập nhật phức tạp hơn vì phải bảo toàn chuỗi <code>Next</code>.</p>
+
+  <h4>4b. Áp dụng: h(k) = k mod 5, chèn 12, 22, 15, 27, 7</h4>
+  <div class="tw">
+  <table>
+    <tr><th>Thứ tự</th><th>k</th><th>h(k)</th><th>Xử lý</th><th>Slot</th><th>Cập nhật Next</th></tr>
+    <tr><td>1</td><td>12</td><td>2</td><td class="tl">Slot 2 trống</td><td class="gr">2</td><td>Next[2] = -1</td></tr>
+    <tr><td>2</td><td>22</td><td>2</td><td class="tl">Slot 2 bị chiếm, tìm từ cuối: slot 4 trống</td><td class="gr">4</td><td>Next[2] = 4</td></tr>
+    <tr><td>3</td><td>15</td><td>0</td><td class="tl">Slot 0 trống</td><td class="gr">0</td><td>Next[0] = -1</td></tr>
+    <tr><td>4</td><td>27</td><td>2</td><td class="tl">Đi chuỗi 2 → 4, slot 3 trống</td><td class="gr">3</td><td>Next[4] = 3</td></tr>
+    <tr><td>5</td><td>7</td><td>2</td><td class="tl">Đi chuỗi 2 → 4 → 3, slot 1 trống</td><td class="gr">1</td><td>Next[3] = 1</td></tr>
+  </table>
+  </div>
+  <div class="tw">
+  <table>
+    <tr><th>Slot</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th></tr>
+    <tr><td><b>Key</b></td><td class="hl">15</td><td class="hl">7</td><td class="hl">12</td><td class="hl">27</td><td class="hl">22</td></tr>
+    <tr><td><b>Next</b></td><td>-1</td><td>-1</td><td class="gr">4</td><td class="gr">1</td><td class="gr">3</td></tr>
+  </table>
+  </div>
+  <p class="p"><b>Chuỗi bucket 2:</b> 2(12) → 4(22) → 3(27) → 1(7) → NULL.</p>
+</div>
+
+<div class="card" style="border-color:rgba(63,185,80,.35);background:rgba(63,185,80,.035)">
+  <div class="card-h"><span class="qn">Checklist</span><h3>Tự kiểm tra trước khi nộp bài</h3></div>
+  <ul class="ul">
+    <li><b>Câu 1:</b> Có duyệt đủ <code>while(p != NULL)</code>, có cập nhật <code>p = p-&gt;Next</code>, có xử lý trường hợp danh sách rỗng.</li>
+    <li><b>Câu 2:</b> Bảng Stack có đủ cột: ký tự đang đọc, trạng thái Stack, chuỗi kết quả, thao tác.</li>
+    <li><b>Câu 3:</b> Hàm đệ quy có điều kiện dừng; AVL có ghi rõ nút mất cân bằng và loại xoay.</li>
+    <li><b>Câu 4:</b> Đã tính <code>h(k)</code> theo đúng thứ tự chèn; Linear có dò vòng; Coalesced có cập nhật đúng <code>Next</code>.</li>
+  </ul>
+</div>
+
+
+<!-- ======================================================= -->
+<!-- GHI CHÚ QUAN TRỌNG -->
+<!-- ======================================================= -->
+<div id="note" class="div"></div>
+<div class="card" style="border-color:rgba(210,153,34,.35)">
+  <div class="card-h"><span class="qn" style="color:var(--acc4)">⚠ Ghi chú</span><h3>Quy ước chuyển mọi mẫu code sang C thuần</h3></div>
+  <div class="tw">
+  <table>
+    <tr><th>Tình huống</th><th>Không dùng trong bài C</th><th>C thuần cần viết</th></tr>
+    <tr><td class="tl">Cấp phát bộ nhớ</td><td class="tl"><code>SNode* p = new SNode;</code></td><td class="tl"><code>SNode* p = (SNode*)malloc(sizeof(SNode));</code></td></tr>
+    <tr><td class="tl">Giải phóng bộ nhớ</td><td class="tl"><code>delete p;</code></td><td class="tl"><code>free(p);</code></td></tr>
+    <tr><td class="tl">Tham chiếu trong hàm</td><td class="tl"><code>void init(SList &amp;sl)</code></td><td class="tl"><code>void init(SList* sl)</code> — gọi: <code>init(&sl)</code></td></tr>
+    <tr><td class="tl">Con trỏ đến con trỏ (AVL)</td><td class="tl"><code>void rotateLL(AVLNode* &amp;T)</code></td><td class="tl"><code>void rotateLL(AVLNode** T)</code> — gọi: <code>rotateLL(&root)</code></td></tr>
+    <tr><td class="tl">Khai báo struct</td><td class="tl"><code>struct SNode { ... };</code><br>Dùng ngay: <code>SNode* p;</code></td><td class="tl"><code>typedef struct SNode { ... } SNode;</code><br>Hoặc dùng <code>struct SNode* p;</code></td></tr>
+    <tr><td class="tl">Boolean</td><td class="tl"><code>bool</code>, <code>true</code>, <code>false</code></td><td class="tl">Dùng <code>int</code>: 0=false, 1=true</td></tr>
+    <tr><td class="tl">Swap</td><td class="tl"><code>swap(a, b)</code> (STL)</td><td class="tl">Tự viết bằng biến tạm: <code>int t=a; a=b; b=t;</code></td></tr>
+  </table>
+  </div>
+  <h4>Ghi chú học thuật — so sánh với CLRS / Sedgewick</h4>
+  <ul class="ul">
+    <li><b>Định nghĩa CSCB:</b> GT Thầy Thọ: <code>CSCB = h_phải − h_trái</code> (RH − LH). CLRS và một số sách dùng ngược lại. Trong thi: theo đúng GT → LH = -1, EH = 0, RH = +1.</li>
+    <li><b>Mức cây (Level):</b> trong code ôn tập này quy ước k=0 là gốc. Khi đề thi quy ước gốc ở mức 1 thì cần đổi điều kiện dừng tương ứng.</li>
+    <li><b>Trường hợp LB/RB trong AVL:</b> Chỉ xảy ra khi <b>xóa</b> nút (không xảy ra khi thêm). GT Thầy Thọ gọi riêng là LB/RB; đây là điểm đặc thù của giáo trình, CLRS không phân biệt riêng nhưng logic tương đương.</li>
+    <li><b>Coalesced Hashing:</b> GT Thầy Thọ tìm ô trống từ cuối bảng lên — đây là biến thể LISCH. Một số tài liệu tìm từ đầu xuống. Trong thi: theo GT = <em>từ cuối lên</em>.</li>
+    <li><b>Hàm băm tốt:</b> tính toán nhanh, phân bố khóa tương đối đều và giảm xung đột. Khi làm bài, luôn tính đúng h(k), chỉ rõ vị trí va chạm và cách xử lý.</li>
+  </ul>
+</div>
+
+<!-- Chiến lược thi -->
+<div class="card" style="border-color:rgba(63,185,80,.3);background:rgba(63,185,80,.03)">
+  <div class="card-h"><span class="qn" style="color:var(--acc3)">🎯 Chiến lược</span><h3>Phân bổ thời gian 75 phút trong phòng thi</h3></div>
+  <div class="tw">
+  <table>
+    <tr><th>Câu</th><th>Nội dung</th><th>Thời gian</th><th>Mẹo</th></tr>
+    <tr><td><b>1</b></td><td>Code C — DSLK (1a + 1b)</td><td>15 phút</td><td class="tl gr">Viết hàm phụ trợ trước (isPrime, isPerfect), gọi lại trong hàm chính</td></tr>
+    <tr><td><b>2</b></td><td>Lý thuyết Stack + Kẻ bảng trace</td><td>15 phút</td><td class="tl hl">Kẻ bảng nháp trước! Sai 1 dòng kéo sai toàn bộ</td></tr>
+    <tr><td><b>3</b></td><td>Code đệ quy BST + Vẽ cây AVL</td><td>25 phút</td><td class="tl rd">Ghi rõ "Mất CB tại nút X, áp dụng phép xoay Y" — bắt buộc!</td></tr>
+    <tr><td><b>4</b></td><td>Lý thuyết + Vẽ bảng băm</td><td>15 phút</td><td class="tl gr">Tính h(k) hết trước, rồi điền bảng — không nhảy cóc</td></tr>
+    <tr><td></td><td>Kiểm tra lại</td><td>5 phút</td><td class="tl">Ưu tiên: phép xoay AVL + bảng Stack</td></tr>
+  </table>
+  </div>
+</div>
+
+<div style="text-align:center;color:var(--muted);font-size:12.5px;margin-top:36px;padding-top:20px;border-top:1px solid var(--border)">
+  Tài liệu biên soạn theo giáo trình CTDL&amp;GT — <b>Thầy Trần Văn Thọ (2019)</b> và mở rộng theo đề ôn tập cuối kỳ.<br>
+  Toàn bộ code ngôn ngữ <b>C</b> (không phải C++) · Dành cho ôn tập cuối kỳ
+</div>
+
+</div><!-- /wrap -->
+</body>
+</html>

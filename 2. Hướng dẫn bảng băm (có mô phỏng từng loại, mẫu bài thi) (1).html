@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bảng Băm — Ôn tập CTDL&GT bằng ngôn ngữ C</title>
+<style>
+:root{
+  --bg:#0d1117;--s1:#161b22;--s2:#1c2128;--s3:#21262d;
+  --bdr:#30363d;--bdr2:#3d444d;
+  --blue:#58a6ff;--purple:#bc8cff;--green:#3fb950;--yellow:#d29922;
+  --red:#f85149;--orange:#fb923c;--cyan:#56d364;
+  --text:#e6edf3;--muted:#8b949e;--dim:#656d76;
+  --code:#f0883e;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;line-height:1.6}
+
+/* NAV */
+.topnav{
+  position:sticky;top:0;z-index:200;
+  background:rgba(13,17,23,.96);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--bdr);
+  padding:10px 20px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+}
+.logo{font-weight:800;font-size:15px;color:var(--blue);margin-right:10px;white-space:nowrap}
+.navlink{color:var(--muted);text-decoration:none;font-size:12px;padding:4px 10px;border-radius:20px;transition:.2s;white-space:nowrap;border:1px solid transparent}
+.navlink:hover,.navlink.active{background:var(--s2);color:var(--text);border-color:var(--bdr)}
+
+/* WRAPPER */
+.wrap{max-width:1100px;margin:0 auto;padding:24px 16px 80px}
+
+/* HERO */
+.hero{
+  background:linear-gradient(135deg,#0d1117 0%,#161b22 50%,#1a1f2e 100%);
+  border:1px solid var(--bdr);border-radius:16px;
+  padding:40px 36px;margin-bottom:36px;position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'#';position:absolute;right:32px;top:20px;
+  font-size:180px;font-weight:900;color:rgba(88,166,255,.04);
+  font-family:monospace;line-height:1;pointer-events:none;
+}
+.hero h1{font-size:28px;font-weight:800;margin-bottom:8px}
+.hero h1 span{color:var(--blue)}
+.hero p{color:var(--muted);max-width:640px;font-size:13.5px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.chip{display:inline-flex;align-items:center;gap:5px;background:var(--s2);border:1px solid var(--bdr);border-radius:20px;padding:3px 12px;font-size:11.5px;color:var(--muted)}
+
+/* THEORY CARD */
+.card{background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:0;margin-bottom:20px;overflow:hidden}
+.card-head{padding:16px 20px 14px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px}
+.card-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.card-body{padding:20px}
+h2.sec-title{font-size:20px;font-weight:700;margin:36px 0 16px;padding-bottom:12px;border-bottom:2px solid var(--bdr);display:flex;align-items:center;gap:10px}
+h2.sec-title .num{background:var(--blue);color:#000;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0}
+h3.sub{font-size:15px;font-weight:700;margin:0 0 10px}
+p.p{font-size:13.5px;color:var(--text);margin:8px 0}
+p.muted{color:var(--muted);font-size:13px}
+.note{background:#0d2137;border-left:3px solid var(--blue);border-radius:0 8px 8px 0;padding:10px 14px;margin:10px 0;font-size:13px}
+.warn{background:#1d1a0a;border-left:3px solid var(--yellow);border-radius:0 8px 8px 0;padding:10px 14px;margin:10px 0;font-size:13px}
+.note b,.warn b{display:block;font-size:12px;margin-bottom:3px}
+strong.hl{color:var(--yellow)}
+strong.bl{color:var(--blue)}
+strong.gn{color:var(--green)}
+strong.rd{color:var(--red)}
+code.c{background:var(--s2);border:1px solid var(--bdr);border-radius:4px;padding:1px 6px;font-family:monospace;font-size:12.5px;color:var(--orange)}
+pre.code{background:#010409;border:1px solid var(--bdr);border-radius:10px;padding:14px 16px;font-size:12px;overflow-x:auto;font-family:'Cascadia Code','Consolas',monospace;line-height:1.65;margin:10px 0}
+.kw{color:#ff7b72}.fn{color:#d2a8ff}.cm{color:#8b949e;font-style:italic}.str{color:#a5d6ff}.num{color:#79c0ff}.ty{color:#ffa657}.pp{color:#79c0ff}
+
+/* COMPARISON TABLE */
+.cmp-table{width:100%;border-collapse:collapse;font-size:12.5px;margin:12px 0}
+.cmp-table th{background:var(--s2);color:var(--blue);padding:9px 12px;text-align:center;border:1px solid var(--bdr);font-weight:700}
+.cmp-table td{padding:8px 12px;border:1px solid var(--bdr);text-align:center;vertical-align:middle}
+.cmp-table td.tl{text-align:left}
+.cmp-table tr:nth-child(even) td{background:rgba(255,255,255,.015)}
+.tag-g{background:rgba(63,185,80,.15);color:var(--green);border-radius:4px;padding:1px 7px;font-size:11px}
+.tag-r{background:rgba(248,81,73,.15);color:var(--red);border-radius:4px;padding:1px 7px;font-size:11px}
+.tag-y{background:rgba(210,153,34,.15);color:var(--yellow);border-radius:4px;padding:1px 7px;font-size:11px}
+.tag-b{background:rgba(88,166,255,.15);color:var(--blue);border-radius:4px;padding:1px 7px;font-size:11px}
+
+/* ===== ANIMATION ENGINE ===== */
+.sim-wrapper{background:var(--s1);border:1px solid var(--bdr);border-radius:14px;padding:24px;margin:20px 0}
+.sim-title{font-size:16px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.sim-desc{color:var(--muted);font-size:13px;margin-bottom:20px}
+
+/* Controls */
+.ctrl-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:20px}
+.ctrl-row input[type=text],.ctrl-row input[type=number]{
+  background:var(--s2);border:1px solid var(--bdr);color:var(--text);
+  border-radius:8px;padding:7px 12px;font-size:13px;width:120px;
+  outline:none;transition:.2s;
+}
+.ctrl-row input:focus{border-color:var(--blue)}
+.btn{
+  background:var(--blue);color:#000;border:none;border-radius:8px;
+  padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;transition:.2s;
+  white-space:nowrap;
+}
+.btn:hover{background:#79b8ff}
+.btn.secondary{background:var(--s2);color:var(--text);border:1px solid var(--bdr)}
+.btn.secondary:hover{background:var(--s3);border-color:var(--blue)}
+.btn.danger{background:rgba(248,81,73,.15);color:var(--red);border:1px solid rgba(248,81,73,.3)}
+.btn.danger:hover{background:rgba(248,81,73,.25)}
+
+.formula-bar{
+  background:var(--s2);border:1px solid var(--bdr);border-radius:8px;
+  padding:8px 14px;font-size:13px;margin-bottom:16px;
+  display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+}
+.formula-bar .label{color:var(--muted);font-size:12px}
+.formula-bar .val{color:var(--yellow);font-weight:700;font-family:monospace}
+
+/* LOG */
+.log{
+  background:#010409;border:1px solid var(--bdr);border-radius:8px;
+  padding:12px 14px;font-size:12px;font-family:monospace;
+  max-height:140px;overflow-y:auto;margin-top:14px;line-height:1.8;
+}
+.log .step{color:var(--muted)}
+.log .ok{color:var(--green)}
+.log .collision{color:var(--yellow)}
+.log .probe{color:var(--blue)}
+.log .error{color:var(--red)}
+.log .key-val{color:var(--orange);font-weight:700}
+
+/* ===== HASH TABLE VISUAL ===== */
+/* --- CHAINING --- */
+.chain-container{display:flex;gap:6px;align-items:flex-start;flex-wrap:wrap}
+.bucket-col{display:flex;flex-direction:column;align-items:flex-start;gap:0}
+.bucket-row{display:flex;align-items:center;gap:0;margin-bottom:4px}
+.bucket-idx{
+  width:28px;text-align:right;font-size:11px;color:var(--muted);
+  font-family:monospace;margin-right:6px;
+}
+.bucket-cell{
+  width:54px;height:40px;border:2px solid var(--bdr2);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;font-family:monospace;
+  background:var(--s2);transition:all .4s;position:relative;
+}
+.bucket-cell.empty{color:var(--dim);font-size:11px;font-weight:400}
+.bucket-cell.active{border-color:var(--blue);background:rgba(88,166,255,.12);color:var(--blue)}
+.bucket-cell.highlight{border-color:var(--green);background:rgba(63,185,80,.12);color:var(--green);animation:pulse .6s ease}
+.bucket-cell.collision{border-color:var(--yellow);background:rgba(210,153,34,.12);color:var(--yellow);animation:shake .4s ease}
+.bucket-cell.new-insert{animation:pop .5s ease}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@keyframes pop{0%{transform:scale(0.5);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+@keyframes slideIn{from{transform:translateX(-20px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+.arrow-right{width:20px;height:2px;background:var(--muted);position:relative;flex-shrink:0;margin:0 2px;margin-top:-1px}
+.arrow-right::after{content:'';position:absolute;right:-5px;top:-4px;border:5px solid transparent;border-left-color:var(--muted)}
+.arrow-right.green{background:var(--green)}.arrow-right.green::after{border-left-color:var(--green)}
+.arrow-null{color:var(--dim);font-size:11px;margin-left:4px;font-family:monospace}
+
+/* node in chain */
+.chain-node{
+  min-width:52px;height:40px;border:2px solid var(--bdr2);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;font-family:monospace;
+  background:var(--s3);transition:all .4s;
+}
+.chain-node.new-node{border-color:var(--green);background:rgba(63,185,80,.12);color:var(--green);animation:pop .5s ease}
+
+/* --- FLAT TABLE (Coalesced & Linear) --- */
+.flat-table{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+.flat-cell{
+  width:72px;min-height:70px;border:2px solid var(--bdr2);border-radius:8px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:monospace;background:var(--s2);transition:all .4s;
+  position:relative;
+}
+.flat-cell .idx-label{font-size:10px;color:var(--dim);position:absolute;top:4px;left:0;right:0;text-align:center}
+.flat-cell .key-val{font-size:15px;font-weight:800;color:var(--text)}
+.flat-cell .next-val{font-size:11px;color:var(--muted);margin-top:2px}
+.flat-cell.empty{color:var(--dim)}
+.flat-cell.empty .key-val{font-size:11px;font-weight:400;color:var(--dim)}
+.flat-cell.active{border-color:var(--blue);background:rgba(88,166,255,.1);animation:pulse .5s}
+.flat-cell.occupied{border-color:var(--green);background:rgba(63,185,80,.1)}
+.flat-cell.occupied .key-val{color:var(--green)}
+.flat-cell.collision-cell{border-color:var(--yellow);background:rgba(210,153,34,.1)}
+.flat-cell.collision-cell .key-val{color:var(--yellow)}
+.flat-cell.new-cell{border-color:var(--green);background:rgba(63,185,80,.15);animation:pop .5s ease}
+.flat-cell.new-cell .key-val{color:var(--green)}
+.flat-cell.probe-cell{border-color:var(--purple);background:rgba(188,140,255,.1)}
+.flat-cell.probe-cell .key-val{color:var(--purple)}
+.flat-cell.chain-link{border-style:dashed;border-color:var(--orange)}
+.flat-cell.chain-link .next-val{color:var(--orange)}
+
+/* STEP AREA */
+.step-area{
+  background:var(--s2);border:1px solid var(--bdr);border-radius:8px;
+  padding:12px 16px;margin:14px 0;min-height:48px;font-size:13px;
+  display:flex;align-items:center;gap:10px;
+}
+.step-area .step-icon{font-size:18px;flex-shrink:0}
+.step-area .step-text{flex:1}
+.step-num-badge{
+  background:var(--blue);color:#000;border-radius:4px;
+  padding:1px 8px;font-size:11px;font-weight:800;white-space:nowrap;
+}
+
+/* KEY QUEUE display */
+.key-queue{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.key-chip{
+  background:var(--s2);border:1px solid var(--bdr);border-radius:6px;
+  padding:4px 10px;font-family:monospace;font-weight:700;font-size:13px;
+  transition:.3s;
+}
+.key-chip.done{opacity:.4;text-decoration:line-through}
+.key-chip.current{background:rgba(88,166,255,.15);border-color:var(--blue);color:var(--blue);transform:scale(1.08)}
+
+/* EXERCISE SECTION */
+.exercise-box{
+  background:var(--s2);border:1px solid var(--bdr);border-radius:12px;
+  padding:20px;margin:16px 0;
+}
+.exercise-num{
+  display:inline-block;background:var(--purple);color:#000;
+  border-radius:6px;padding:1px 10px;font-size:12px;font-weight:800;margin-bottom:10px;
+}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.grid2{grid-template-columns:1fr}}
+
+/* Scroll indicator for flat tables */
+.scroll-hint{font-size:11px;color:var(--dim);margin-bottom:6px}
+
+.speed-control{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.speed-control input[type=range]{width:80px;accent-color:var(--blue)}
+
+/* divider */
+.div{height:1px;background:var(--bdr);margin:32px 0}
+
+/* Preset buttons */
+.presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.preset-btn{
+  background:var(--s2);border:1px solid var(--bdr);color:var(--muted);
+  border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;transition:.2s;
+}
+.preset-btn:hover{border-color:var(--blue);color:var(--text)}
+
+/* Legend */
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted)}
+.legend-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <div class="logo">⚡ Hash Table</div>
+  <a href="#theory" class="navlink">Lý thuyết</a>
+  <a href="#chaining-sim" class="navlink">Chaining</a>
+  <a href="#linear-sim" class="navlink">Linear Probing</a>
+  <a href="#coalesced-sim" class="navlink">Coalesced</a>
+  <a href="#double-sim" class="navlink">Double Hashing (mở rộng)</a>
+  <a href="#paper-exam" class="navlink">Mẫu giấy thi</a>
+  <a href="#exercises" class="navlink">Bài tập thi</a>
+</div>
+
+<div class="wrap">
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Bảng Băm <span>(Hash Table)</span></h1>
+  <p>Ôn tập trọng tâm Chương 6 — Bảng băm. Ba phương pháp chính bám theo giáo trình: Kết nối trực tiếp, Kết nối hợp nhất, Dò tuyến tính. Phần Double Hashing là nội dung mở rộng theo đề ôn tập cuối kỳ.</p>
+  <div class="chips">
+    <span class="chip">📖 Theo giáo trình: Chaining, Coalesced, Linear Probing</span>
+    <span class="chip">🎬 Animation từng bước</span>
+    <span class="chip">➕ Mở rộng theo đề ôn tập: Double Hashing</span>
+    <span class="chip">📝 Đề thi mẫu CLO1 + CLO2</span>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- THEORY -->
+<!-- ============================================================ -->
+<div id="theory">
+<h2 class="sec-title"><span class="num">§</span>Lý thuyết Bảng Băm</h2>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-icon" style="background:rgba(88,166,255,.15);color:var(--blue)">🔑</div>
+    <div><h3 class="sub" style="margin:0">Khái niệm cốt lõi (CLO2 — câu lý thuyết 4 ý × 0.25đ)</h3></div>
+  </div>
+  <div class="card-body">
+    <div class="grid2">
+      <div>
+        <p class="p"><strong class="bl">Bảng băm</strong> là cấu trúc dữ liệu dùng <strong>hàm băm h(k)</strong> ánh xạ khóa k thành địa chỉ trong mảng. Mục tiêu: tra cứu <code class="c">O(1)</code> trung bình.</p>
+        <p class="p"><strong class="hl">Va chạm (Collision)</strong>: Hai khóa khác nhau cùng có giá trị h(k) → cùng chỉ số. Không tránh được hoàn toàn → cần chiến lược xử lý.</p>
+        <p class="p"><strong class="rd">Phân cụm (Clustering)</strong>: Các phần tử va chạm tích tụ liền kề nhau, làm chuỗi tìm kiếm dài ra. Linear Probing dễ bị nhất.</p>
+      </div>
+      <div>
+        <p class="p"><strong class="gn">Hàm băm tốt</strong> theo GT Thầy Thọ phải:</p>
+        <ul style="padding-left:18px;font-size:13px;margin-top:4px">
+          <li>Tính toán <strong>nhanh</strong></li>
+          <li><strong>Giảm thiểu</strong> va chạm</li>
+          <li>Phân bố <strong>đều</strong> các khóa trên MAXSIZE địa chỉ</li>
+          <li>Xử lý được nhiều <strong>kiểu dữ liệu</strong> khác nhau</li>
+        </ul>
+        <p class="p" style="margin-top:8px">Công thức phổ biến: <code class="c">h(k) = k mod m</code></p>
+        <div class="note"><b>💡 Mẹo thực hành khi dùng h(k)=k mod m</b> Nên chọn m là số nguyên tố và tránh các giá trị quá đặc biệt như lũy thừa của 2 hoặc 10, vì điều này thường giúp khóa phân bố đều hơn. Đây là ghi chú mở rộng, không phải công thức bắt buộc.</div>
+      </div>
+    </div>
+
+    <div class="div" style="margin:16px 0"></div>
+
+    <h3 class="sub">So sánh 3 phương pháp (CLO2 — câu lý thuyết bắt buộc)</h3>
+    <div style="overflow-x:auto">
+    <table class="cmp-table">
+      <tr>
+        <th>Tiêu chí</th>
+        <th>Kết nối trực tiếp<br><small style="font-weight:400;color:var(--muted)">Direct Chaining</small></th>
+        <th>Kết nối hợp nhất<br><small style="font-weight:400;color:var(--muted)">Coalesced Hashing</small></th>
+        <th>Dò tuyến tính<br><small style="font-weight:400;color:var(--muted)">Linear Probing</small></th>
+      </tr>
+      <tr>
+        <td class="tl"><strong>Cấu trúc lưu</strong></td>
+        <td>Mảng con trỏ + DSLK ngoài bảng</td>
+        <td>Mảng tĩnh nội tuyến có cột <code class="c">Next</code></td>
+        <td>Mảng tĩnh, chỉ có trường <code class="c">Key</code></td>
+      </tr>
+      <tr>
+        <td class="tl"><strong>Khi va chạm</strong></td>
+        <td>Nối vào cuối DSLK của bucket</td>
+        <td>Tìm ô trống từ <em>cuối bảng lên</em>, nối Next</td>
+        <td>Dò +1 tuần tự (mod m) đến ô trống</td>
+      </tr>
+      <tr>
+        <td class="tl"><strong>Phân cụm</strong></td>
+        <td><span class="tag-g">Không có phân cụm sơ cấp</span><br><small style="color:var(--muted)">nhưng bucket có thể dài nếu hash kém</small></td>
+        <td><span class="tag-y">Có thể có chuỗi Next dài</span><br><small style="color:var(--muted)">ít phân cụm sơ cấp hơn Linear</small></td>
+        <td><span class="tag-r">Phân cụm sơ cấp nặng</span></td>
+      </tr>
+      <tr>
+        <td class="tl"><strong>Bộ nhớ</strong></td>
+        <td>Tốn thêm cho con trỏ ngoài</td>
+        <td>Tiết kiệm — toàn bộ trong mảng</td>
+        <td>Tối thiểu nhất</td>
+      </tr>
+      <tr>
+        <td class="tl"><strong>Xóa phần tử</strong></td>
+        <td><span class="tag-g">Dễ dàng</span></td>
+        <td><span class="tag-y">Phức tạp hơn</span></td>
+        <td><span class="tag-r">Cần đánh dấu DELETED</span></td>
+      </tr>
+      <tr>
+        <td class="tl"><strong>Hiệu suất tốt</strong></td>
+        <td>Khi tải cao, xóa nhiều</td>
+        <td>Tải vừa, bảng cố định</td>
+        <td>Khi tải thấp &lt;70%</td>
+      </tr>
+    </table>
+    </div>
+
+    <div class="warn" style="margin-top:12px"><b>⚠ Câu hỏi CLO2 thường hỏi: "Trình bày ưu điểm của phương pháp X"</b>
+    <strong>Chaining</strong>: linh hoạt khi hệ số tải lớn hơn 1, dễ xóa node trong DSLK, không bị phân cụm sơ cấp; nhưng nếu hash kém thì bucket dài và tìm kiếm có thể chậm tới O(n). <strong>Coalesced</strong>: tiết kiệm bộ nhớ ngoài, dữ liệu nằm trong một mảng có cột Next; cần cập nhật liên kết cẩn thận. <strong>Linear Probing</strong>: đơn giản, cache-friendly vì dữ liệu liền kề trong RAM, nhưng dễ bị phân cụm sơ cấp.</div>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SIMULATOR 1: CHAINING -->
+<!-- ============================================================ -->
+<div id="chaining-sim">
+<h2 class="sec-title"><span class="num">1</span>Kết nối trực tiếp (Direct Chaining)</h2>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-icon" style="background:rgba(88,166,255,.15);color:var(--blue)">📎</div>
+    <h3 class="sub" style="margin:0">Nguyên lý: mỗi bucket là một Danh sách liên kết riêng bên ngoài bảng</h3>
+  </div>
+  <div class="card-body">
+    <p class="p"><strong>Cấu trúc:</strong> Mảng <code class="c">bucket[0..m-1]</code>, mỗi ô chứa con trỏ đầu DSLK. Khi va chạm → thêm node mới vào cuối DSLK của bucket đó.</p>
+    <p class="p"><strong>Quy trình chèn:</strong> Tính <code class="c">b = h(k) = k mod m</code> → chèn vào cuối <code class="c">bucket[b]</code>.</p>
+    <p class="p"><strong>Tìm kiếm:</strong> Tính b → duyệt tuyến tính trong <code class="c">bucket[b]</code>. Độ phức tạp trung bình <code class="c">O(1 + n/m)</code>.</p>
+
+    <div class="note"><b>📌 Vẽ trên giấy thi</b> — Quy tắc bắt buộc:<br>
+    1. Vẽ cột dọc gồm m ô (bucket 0 → m-1), mỗi ô ghi chỉ số bên trái.<br>
+    2. Từ mỗi bucket có phần tử, kéo mũi tên sang phải thành chuỗi node.<br>
+    3. Node cuối cùng mũi tên trỏ <code class="c">NULL</code>. Bucket trống vẫn ghi <code class="c">NULL</code>.</div>
+    <div class="note"><b>📌 Quy ước hình vẽ</b> Trong sơ đồ rút gọn, ô bucket có thể được vẽ như đang chứa node đầu tiên. Tuy nhiên về bản chất cài đặt, bucket là con trỏ <code class="c">Head</code> trỏ đến DSLK các khóa có cùng <code class="c">h(k)</code>.</div>
+  </div>
+</div>
+
+<div class="sim-wrapper" id="chaining-sim-box">
+  <div class="sim-title">🎬 Simulator — Kết nối trực tiếp</div>
+  <div class="sim-desc">Nhập danh sách khóa và kích thước bảng. Nhấn "Thêm từng bước" để xem animation từng phần tử.</div>
+
+  <div class="ctrl-row">
+    <div>
+      <div style="font-size:11.5px;color:var(--muted);margin-bottom:4px">Kích thước m =</div>
+      <input type="number" id="chain-m" value="5" min="3" max="13" style="width:70px">
+    </div>
+    <div>
+      <div style="font-size:11.5px;color:var(--muted);margin-bottom:4px">Dãy khóa (cách nhau dấu phẩy)</div>
+      <input type="text" id="chain-keys" value="12,29,13,15,27,34,7" style="width:260px">
+    </div>
+    <div style="align-self:flex-end">
+      <button class="btn" onclick="chainReset()">Reset &amp; Khởi tạo</button>
+    </div>
+    <div style="align-self:flex-end">
+      <button class="btn secondary" onclick="chainStep()">▶ Thêm 1 bước</button>
+    </div>
+    <div style="align-self:flex-end">
+      <button class="btn secondary" onclick="chainAuto()">⏩ Tự động</button>
+    </div>
+    <div class="speed-control" style="align-self:flex-end">
+      <span>Tốc độ:</span>
+      <input type="range" id="chain-speed" min="200" max="2000" value="800" step="100">
+    </div>
+  </div>
+
+  <div class="presets">
+    <span style="font-size:12px;color:var(--muted);align-self:center">Đề thi mẫu:</span>
+    <button class="preset-btn" onclick="chainPreset('5','12,29,13,15,27,34,7')">Bài 4.1 (m=5)</button>
+    <button class="preset-btn" onclick="chainPreset('7','14,21,28,35,42')">Phân cụm cực đoan (m=7)</button>
+    <button class="preset-btn" onclick="chainPreset('7','14,21,28,35,42,17,24')">Bài 4.8 mở rộng</button>
+  </div>
+
+  <div class="formula-bar">
+    <span class="label">Hàm băm:</span>
+    <span class="val" id="chain-formula">h(k) = k mod 5</span>
+    <span class="label" style="margin-left:16px">Đang chèn:</span>
+    <span class="val" id="chain-current">—</span>
+    <span class="label" style="margin-left:16px">h(k) =</span>
+    <span class="val" id="chain-hk">—</span>
+  </div>
+
+  <div class="key-queue" id="chain-queue"></div>
+
+  <div class="step-area" id="chain-step-msg">
+    <span class="step-icon">💡</span>
+    <span class="step-text">Nhấn "Reset &amp; Khởi tạo" để bắt đầu.</span>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(63,185,80,.4);border:1px solid var(--green)"></div>Vừa chèn (mới)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(88,166,255,.2);border:1px solid var(--blue)"></div>Bucket đang xử lý</div>
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(210,153,34,.2);border:1px solid var(--yellow)"></div>Va chạm</div>
+  </div>
+
+  <!-- CHAIN VISUAL -->
+  <div id="chain-visual" style="overflow-x:auto;padding-bottom:8px"></div>
+
+  <!-- LOG -->
+  <div class="log" id="chain-log"><span class="step">Nhật ký sẽ hiển thị ở đây...</span></div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SIMULATOR 2: LINEAR PROBING -->
+<!-- ============================================================ -->
+<div id="linear-sim">
+<h2 class="sec-title"><span class="num">2</span>Dò tuyến tính (Linear Probing)</h2>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-icon" style="background:rgba(188,140,255,.15);color:var(--purple)">🔍</div>
+    <h3 class="sub" style="margin:0">Nguyên lý: khi va chạm, dò tuần tự +1 (có vòng lặp) cho đến ô trống</h3>
+  </div>
+  <div class="card-body">
+    <p class="p"><strong>Công thức dò lại:</strong> <code class="c">h'(k, i) = (h(k) + i) mod m</code>, với i = 1, 2, 3, ...</p>
+    <p class="p"><strong>Quy tắc vòng:</strong> Khi dò đến slot cuối (m-1) mà vẫn chiếm → <strong>quay về slot 0</strong> tiếp tục dò. Không bao giờ dừng giữa chừng trừ khi tìm được ô trống.</p>
+    <div class="warn"><b>⚠ Điểm nguy hiểm trong thi: Phân cụm sơ cấp (Primary Clustering)</b><br>
+    Khi các phần tử va chạm tích tụ liên tiếp, phần tử mới h(k) = bất kỳ slot nào trong cụm đều phải dò qua toàn bộ cụm. Chi phí tìm kiếm → O(n) trong trường hợp xấu nhất.</div>
+    <div class="note"><b>📌 Vẽ trên giấy thi</b><br>
+    1. Tính h(k) cho từng khóa TRƯỚC khi vẽ.<br>
+    2. Điền vào bảng có m ô ngang (slot 0 → m-1).<br>
+    3. Khi dò, ghi rõ: "h(k)=X bị chiếm → dò slot X+1 → ... → slot Y trống → chèn vào Y".</div>
+  </div>
+</div>
+
+<div class="sim-wrapper" id="linear-sim-box">
+  <div class="sim-title">🎬 Simulator — Dò tuyến tính</div>
+  <div class="sim-desc">Xem quá trình dò từng bước với hiệu ứng màu sắc từng slot.</div>
+
+  <div class="ctrl-row">
+    <div>
+      <div style="font-size:11.5px;color:var(--muted);margin-bottom:4px">m =</div>
+      <input type="number" id="lp-m" value="7" min="3" max="15" style="width:60px">
+    </div>
+    <div>
+      <div style="font-size:11.5px;color:var(--muted);margin-bottom:4px">Dãy khóa</div>
+      <input type="text" id="lp-keys" value="10,17,24,3,31" style="width:240px">
+    </div>
+    <div style="align-self:flex-end"><button class="btn" onclick="lpReset()">Reset</button></div>
+    <div style="align-self:flex-end"><button class="btn secondary" onclick="lpStep()">▶ Thêm 1 bước</button></div>
+    <div style="align-self:flex-end"><button class="btn secondary" onclick="lpAuto()">⏩ Tự động</button></div>
+    <div class="speed-control" style="align-self:flex-end">
+      <span>Tốc độ:</span>
+      <input type="range" id="lp-speed" min="200" max="2000" value="700" step="100">
+    </div>
+  </div>
+
+  <div class="presets">
+    <span style="font-size:12px;color:var(--muted);align-self:center">Đề thi mẫu:</span>
+    <button class="preset-btn" onclick="lpPreset('7','10,17,24,3,31')">Bài 4.2 (m=7)</button>
+    <button class="preset-btn" onclick="lpPreset('7','8,15,22,29,36')">Bài 4.4 (m=7)</button>
+    <button class="preset-btn" onclick="lpPreset('7','15,22,29,36,8')">Bài 4.5 (m=7)</button>
+    <button class="preset-btn" onclick="lpPreset('10','32,53,22,92,17,34')">VD giáo trình (m=10)</button>
+  </div>
+
+  <div class="formula-bar">
+    <span class="label">Hàm băm:</span>
+    <span class="val" id="lp-formula">h(k) = k mod 7</span>
+    <span class="label" style="margin-left:16px">Đang chèn:</span>
+    <span class="val" id="lp-current">—</span>
+    <span class="label" style="margin-left:16px">h(k) =</span>
+    <span class="val" id="lp-hk">—</span>
+    <span class="label" style="margin-left:16px">Số lần dò:</span>
+    <span class="val" id="lp-probes">0</span>
+  </div>
+
+  <div class="key-queue" id="lp-queue"></div>
+
+  <div class="step-area" id="lp-step-msg">
+    <span class="step-icon">💡</span>
+    <span class="step-text">Nhấn Reset để bắt đầu.</span>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(63,185,80,.4);border:1px solid var(--green)"></div>Đã chèn</div>
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(88,166,255,.2);border:1px solid var(--blue)"></div>Đang xét (h ban đầu)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(188,140,255,.2);border:1px solid var(--purple)"></div>Đang dò (probe)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(210,153,34,.2);border:1px solid var(--yellow)"></div>Bị chiếm (va chạm)</div>
+  </div>
+
+  <div id="lp-visual" style="overflow-x:auto;padding-bottom:8px"></div>
+
+  <div class="log" id="lp-log"><span class="step">Nhật ký sẽ hiển thị ở đây...</span></div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SIMULATOR 3: COALESCED -->
+<!-- ============================================================ -->
+<div id="coalesced-sim">
+<h2 class="sec-title"><span class="num">3</span>Kết nối hợp nhất (Coalesced Hashing)</h2>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-icon" style="background:rgba(251,146,60,.15);color:var(--orange)">🔗</div>
+    <h3 class="sub" style="margin:0">Nguyên lý: mảng tĩnh nội tuyến, va chạm → tìm ô trống từ cuối lên, nối Next</h3>
+  </div>
+  <div class="card-body">
+    <p class="p"><strong>Cấu trúc mỗi nút:</strong> <code class="c">{ Key, Next }</code>. Khởi tạo: <code class="c">Key = NULLKEY</code>, <code class="c">Next = -1</code>.</p>
+    <p class="p"><strong>Biến avail:</strong> Con trỏ tìm ô trống, ban đầu = MAXSIZE-1. Hàm <code class="c">getEmpty()</code> lùi dần từ avail về 0 đến khi gặp ô trống.</p>
+    <div class="note"><b>📌 Vẽ trên giấy thi — Quy tắc từng bước</b><br>
+    1. Tính h(k). Nếu slot h(k) trống → chèn vào đó, Next = -1.<br>
+    2. Nếu slot h(k) đã có → theo chuỗi Next đến nút cuối (Next = -1).<br>
+    3. Tìm ô trống từ cuối bảng (slot m-1) ngược lên → đặt phần tử vào đó.<br>
+    4. Cập nhật: Next của nút cuối chuỗi = chỉ số ô trống vừa tìm.</div>
+    <div class="warn"><b>⚠ Điểm dễ sai nhất:</b> Phải đi theo chuỗi Next đến HẾT trước khi tìm ô trống. Không đặt phần tử mới vào slot h(k) mà vào ô trống cuối bảng.</div>
+  </div>
+</div>
+
+<div class="sim-wrapper" id="coalesced-sim-box">
+  <div class="sim-title">🎬 Simulator — Kết nối hợp nhất</div>
+  <div class="sim-desc">Cột Next hiển thị chỉ số nút tiếp theo trong chuỗi (-1 = cuối chuỗi).</div>
+
+  <div class="ctrl-row">
+    <div>
+      <div style="font-size:11.5px;color:var(--muted);margin-bottom:4px">m =</div>
+      <input type="number" id="coal-m" value="5" min="4" max="13" style="width:60px">
+    </div>
+    <div>
+      <div style="font-size:11.5px;color:var(--muted);margin-bottom:4px">Dãy khóa</div>
+      <input type="text" id="coal-keys" value="12,22,15,27,7" style="width:240px">
+    </div>
+    <div style="align-self:flex-end"><button class="btn" onclick="coalReset()">Reset</button></div>
+    <div style="align-self:flex-end"><button class="btn secondary" onclick="coalStep()">▶ Thêm 1 bước</button></div>
+    <div style="align-self:flex-end"><button class="btn secondary" onclick="coalAuto()">⏩ Tự động</button></div>
+    <div class="speed-control" style="align-self:flex-end">
+      <span>Tốc độ:</span>
+      <input type="range" id="coal-speed" min="300" max="2500" value="1000" step="100">
+    </div>
+  </div>
+
+  <div class="presets">
+    <span style="font-size:12px;color:var(--muted);align-self:center">Đề thi mẫu:</span>
+    <button class="preset-btn" onclick="coalPreset('5','12,22,15,27,7')">Bài 4.3 (m=5)</button>
+    <button class="preset-btn" onclick="coalPreset('5','12,18,24,30,6')">Bài 4.6 (m=5)</button>
+    <button class="preset-btn" onclick="coalPreset('7','5,12,19,26,33')">Bài 4.9 (m=7)</button>
+    <button class="preset-btn" onclick="coalPreset('10','10,15,26,30,25,35')">VD giáo trình (m=10)</button>
+  </div>
+
+  <div class="formula-bar">
+    <span class="label">Hàm băm:</span>
+    <span class="val" id="coal-formula">h(k) = k mod 5</span>
+    <span class="label" style="margin-left:16px">Đang chèn:</span>
+    <span class="val" id="coal-current">—</span>
+    <span class="label" style="margin-left:16px">avail =</span>
+    <span class="val" id="coal-avail">—</span>
+  </div>
+
+  <div class="key-queue" id="coal-queue"></div>
+
+  <div class="step-area" id="coal-step-msg">
+    <span class="step-icon">💡</span>
+    <span class="step-text">Nhấn Reset để bắt đầu.</span>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(63,185,80,.4);border:1px solid var(--green)"></div>Chèn thẳng (không va chạm)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(251,146,60,.3);border:1px solid var(--orange)"></div>Trong chuỗi va chạm (Next ≠ -1)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(88,166,255,.2);border:1px solid var(--blue)"></div>Ô trống vừa tìm được</div>
+  </div>
+
+  <div id="coal-visual" style="overflow-x:auto;padding-bottom:8px"></div>
+
+  <div class="log" id="coal-log"><span class="step">Nhật ký sẽ hiển thị ở đây...</span></div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SIMULATOR 4: DOUBLE HASHING -->
+<!-- ============================================================ -->
+<div id="double-sim">
+<h2 class="sec-title"><span class="num">4</span>Băm kép (Double Hashing) — Mở rộng theo đề ôn tập</h2>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-icon" style="background:rgba(63,185,80,.15);color:var(--green)">✌️</div>
+    <h3 class="sub" style="margin:0">Nguyên lý: dùng 2 hàm băm để tính bước dò, giảm phân cụm sơ cấp</h3>
+  </div>
+  <div class="card-body">
+    <div class="note"><b>➕ Phạm vi</b> Double Hashing là phần mở rộng theo đề ôn tập cuối kỳ; ba phương pháp chính trong giáo trình là Chaining, Coalesced Hashing và Linear Probing.</div>
+    <p class="p"><strong>Công thức:</strong> <code class="c">h(k, i) = (h₁(k) + i × h₂(k)) mod m</code></p>
+    <p class="p">h₁ xác định vị trí ban đầu. h₂ xác định bước dò riêng cho từng khóa, nhờ đó giảm mạnh hiện tượng phân cụm sơ cấp so với Linear Probing.</p>
+    <div class="warn"><b>⚠ Điều kiện quan trọng</b> Cần bảo đảm <code class="c">h₂(k) ≠ 0</code> và <code class="c">h₂(k)</code> nguyên tố cùng nhau với kích thước bảng <code class="c">m</code>. Nếu không, quá trình dò có thể không đi qua hết các slot trong bảng.</div>
+    <p class="p"><strong>Cách thường dùng:</strong> <code class="c">h₂(k) = p − (k mod p)</code>, với p là số nguyên tố nhỏ hơn m. Không nên khẳng định tuyệt đối là “không bao giờ phân cụm”; cách nói chính xác là <strong>giảm phân cụm sơ cấp</strong>.</p>
+  </div>
+</div>
+
+<div class="sim-wrapper" id="double-sim-box">
+  <div class="sim-title">🎬 Simulator — Băm kép <span class="tag-y">Mở rộng theo đề ôn tập</span></div>
+
+  <div class="ctrl-row">
+    <div>
+      <div style="font-size:11.5px;color:var(--muted);margin-bottom:4px">m =</div>
+      <input type="number" id="dh-m" value="7" min="5" max="17" style="width:60px">
+    </div>
+    <div>
+      <div style="font-size:11.5px;color:var(--muted);margin-bottom:4px">h₁ mod</div>
+      <input type="number" id="dh-m1" value="7" min="3" max="17" style="width:60px">
+    </div>
+    <div>
+      <div style="font-size:11.5px;color:var(--muted);margin-bottom:4px">h₂: p−(k mod p), p=</div>
+      <input type="number" id="dh-p" value="5" min="2" max="13" style="width:60px">
+    </div>
+    <div>
+      <div style="font-size:11.5px;color:var(--muted);margin-bottom:4px">Dãy khóa</div>
+      <input type="text" id="dh-keys" value="10,17,24,31,38" style="width:220px">
+    </div>
+    <div style="align-self:flex-end"><button class="btn" onclick="dhReset()">Reset</button></div>
+    <div style="align-self:flex-end"><button class="btn secondary" onclick="dhStep()">▶ Thêm 1 bước</button></div>
+    <div style="align-self:flex-end"><button class="btn secondary" onclick="dhAuto()">⏩ Tự động</button></div>
+  </div>
+
+  <div class="presets">
+    <span style="font-size:12px;color:var(--muted);align-self:center">Đề thi mẫu:</span>
+    <button class="preset-btn" onclick="dhPreset('7','7','5','10,17,24,31,38')">Bài 4.7: h₁mod7, h₂=5−(k mod 5)</button>
+    <button class="preset-btn" onclick="dhPreset('5','5','3','12,17,22,27,32')">Bài 4.10: h₁mod5, h₂=3−(k mod 3)</button>
+  </div>
+
+  <div class="formula-bar">
+    <span class="label">h₁(k) =</span><span class="val" id="dh-f1">k mod 7</span>
+    <span class="label" style="margin-left:12px">h₂(k) =</span><span class="val" id="dh-f2">5−(k mod 5)</span>
+    <span class="label" style="margin-left:12px">Chèn:</span><span class="val" id="dh-current">—</span>
+    <span class="label" style="margin-left:12px">h₁=</span><span class="val" id="dh-h1">—</span>
+    <span class="label" style="margin-left:8px">h₂=</span><span class="val" id="dh-h2">—</span>
+  </div>
+
+  <div class="key-queue" id="dh-queue"></div>
+  <div class="step-area" id="dh-step-msg"><span class="step-icon">💡</span><span class="step-text">Nhấn Reset để bắt đầu.</span></div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(63,185,80,.4);border:1px solid var(--green)"></div>Chèn thành công</div>
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(188,140,255,.2);border:1px solid var(--purple)"></div>Đang dò (probe i×h₂)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(210,153,34,.2);border:1px solid var(--yellow)"></div>Va chạm</div>
+  </div>
+
+  <div id="dh-visual" style="overflow-x:auto;padding-bottom:8px"></div>
+  <div class="log" id="dh-log"><span class="step">Nhật ký sẽ hiển thị ở đây...</span></div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- EXERCISES -->
+<!-- ============================================================ -->
+
+<!-- ============================================================ -->
+<!-- PAPER EXAM SAMPLE -->
+<!-- ============================================================ -->
+<div id="paper-exam">
+<h2 class="sec-title"><span class="num">📝</span>Mẫu trình bày trên giấy thi — Câu 4 Bảng băm</h2>
+
+<div class="exercise-box">
+  <div class="exercise-num">Khung trình bày chung — dùng cho mọi dạng bảng băm</div>
+  <p class="p"><strong>Mục tiêu khi làm bài tự luận:</strong> trình bày ngắn, đủ bước, dễ chấm. Không cần mô tả dài như animation; chỉ cần thể hiện đúng công thức, quá trình xử lý va chạm và bảng kết quả cuối.</p>
+  <div class="note">
+    <b>✅ Công thức 4 bước nên viết trên giấy</b>
+    1. Ghi phương pháp và hàm băm. <br>
+    2. Lập bảng tính <code class="c">h(k)</code> hoặc bảng trace ngắn theo thứ tự chèn. <br>
+    3. Khi có va chạm, ghi rõ quy tắc xử lý: nối DSLK / dò tuyến tính / tìm ô trống từ cuối / băm kép. <br>
+    4. Vẽ bảng kết quả cuối và kết luận ngắn.
+  </div>
+  <div class="warn">
+    <b>⚠ Lỗi thường mất điểm</b>
+    Bỏ qua thứ tự chèn; không ghi rõ slot va chạm; quên dò vòng trong Linear Probing; cập nhật sai cột <code class="c">Next</code> trong Coalesced; hoặc ghi Double Hashing như nội dung chính của giáo trình thay vì phần mở rộng theo đề ôn tập.
+  </div>
+</div>
+
+<div class="exercise-box">
+  <div class="exercise-num">Mẫu 1 — Chaining / Kết nối trực tiếp</div>
+  <h3 class="sub">Đề mẫu: h(k) = k mod 5. Chèn: 12, 29, 13, 15, 27, 34, 7</h3>
+  <pre class="code">Phương pháp: Kết nối trực tiếp.
+Hàm băm: h(k) = k mod 5.
+
+Bảng tính h(k):
+k:     12   29   13   15   27   34   7
+h(k):   2    4    3    0    2    4   2
+
+Bảng kết quả:
+bucket[0] → 15 → NULL
+bucket[1] → NULL
+bucket[2] → 12 → 27 → 7 → NULL
+bucket[3] → 13 → NULL
+bucket[4] → 29 → 34 → NULL
+
+Kết luận: Các khóa có cùng h(k) được nối vào cùng danh sách liên kết.</pre>
+  <div class="note"><b>📌 Quy ước vẽ</b> Bucket là con trỏ <code class="c">Head</code> trỏ đến DSLK. Trên giấy có thể vẽ rút gọn như trên, nhưng phải có mũi tên và <code class="c">NULL</code> cuối chuỗi.</div>
+</div>
+
+<div class="exercise-box">
+  <div class="exercise-num">Mẫu 2 — Linear Probing / Dò tuyến tính</div>
+  <h3 class="sub">Đề mẫu: h(k) = k mod 7. Chèn: 10, 17, 24, 3, 31</h3>
+  <pre class="code">Phương pháp: Dò tuyến tính.
+Hàm băm: h(k) = k mod 7.
+Quy tắc dò: nếu slot bị chiếm thì xét lần lượt (h(k)+i) mod 7.
+
+k    h(k)   Quá trình dò                  Slot chèn
+10    3     slot 3 trống                  3
+17    3     3 bị chiếm → 4 trống          4
+24    3     3,4 bị chiếm → 5 trống        5
+3     3     3,4,5 bị chiếm → 6 trống      6
+31    3     3,4,5,6 bị chiếm → 0 trống    0
+
+Bảng cuối:
+slot: 0   1   2   3   4   5   6
+key: 31   -   -  10  17  24   3
+
+Kết luận: Xuất hiện phân cụm sơ cấp tại cụm slot 3→6→0.</pre>
+  <div class="warn"><b>⚠ Cần ghi rõ dò vòng</b> Khi hết slot 6 thì quay về slot 0 theo công thức modulo. Đây là chỗ sinh viên hay bỏ sót.</div>
+</div>
+
+<div class="exercise-box">
+  <div class="exercise-num">Mẫu 3 — Coalesced Hashing / Kết nối hợp nhất</div>
+  <h3 class="sub">Đề mẫu: h(k) = k mod 5. Chèn: 12, 22, 15, 27, 7</h3>
+  <pre class="code">Phương pháp: Kết nối hợp nhất.
+Hàm băm: h(k) = k mod 5.
+Quy tắc: nếu h(k) trống thì chèn tại h(k); nếu va chạm thì tìm ô trống từ cuối bảng lên, rồi cập nhật Next.
+
+k    h(k)   Xử lý                                      Slot
+12    2     slot 2 trống                              2
+22    2     slot 2 bị chiếm, lấy ô trống cuối: 4       4, Next[2]=4
+15    0     slot 0 trống                              0
+27    2     đi chuỗi 2→4, lấy ô trống cuối: 3          3, Next[4]=3
+7     2     đi chuỗi 2→4→3, lấy ô trống cuối: 1        1, Next[3]=1
+
+Bảng cuối:
+Slot | Key | Next
+0    | 15  | -1
+1    | 7   | -1
+2    | 12  | 4
+3    | 27  | 1
+4    | 22  | 3
+
+Chuỗi bucket 2: 2(12) → 4(22) → 3(27) → 1(7) → NULL.</pre>
+  <div class="note"><b>📌 Mẹo kiểm tra</b> Với khóa có h(k)=2, phải đi theo chuỗi <code class="c">Next</code> bắt đầu từ slot 2. Nếu chuỗi không đúng thứ tự chèn thì cần kiểm tra lại cột <code class="c">Next</code>.</div>
+</div>
+
+<div class="exercise-box">
+  <div class="exercise-num">Mẫu 4 — Double Hashing / Băm kép <span class="tag-y">Mở rộng</span></div>
+  <h3 class="sub">Đề mẫu: h₁(k)=k mod 7, h₂(k)=5−(k mod 5). Chèn: 10, 17, 24, 31, 38</h3>
+  <pre class="code">Phương pháp: Băm kép.
+Lưu ý: Đây là dạng mở rộng theo đề ôn tập.
+
+h1(k) = k mod 7
+h2(k) = 5 - (k mod 5)
+Công thức dò: H(k,i) = (h1(k) + i*h2(k)) mod 7
+
+k    h1   h2   Quá trình dò              Slot
+10    3    5   slot 3 trống              3
+17    3    3   3 bị → (3+1*3)%7=6        6
+24    3    1   3 bị → (3+1*1)%7=4        4
+31    3    4   3 bị → (3+1*4)%7=0        0
+38    3    2   3 bị → (3+1*2)%7=5        5
+
+Bảng cuối:
+slot: 0   1   2   3   4   5   6
+key: 31   -   -  10  24  38  17
+
+Kết luận: Băm kép dùng bước dò h2(k), giúp giảm phân cụm sơ cấp so với dò tuyến tính.</pre>
+</div>
+</div>
+
+
+<div id="exercises">
+<h2 class="sec-title"><span class="num">✍</span>Bài tập thi — Lời giải chi tiết</h2>
+
+<div class="exercise-box">
+  <div class="exercise-num">Câu 4a — CLO2 (0.25đ × 4 ý): Lý thuyết</div>
+  <h3 class="sub">Câu hỏi mẫu: "Trình bày khái niệm và ưu điểm của phương pháp kết nối trực tiếp (Direct Chaining)"</h3>
+  <div class="grid2">
+    <div>
+      <p class="p"><strong class="bl">Khái niệm:</strong> Bảng băm được cài đặt bằng mảng gồm m bucket (chỉ số 0 → m-1). Mỗi bucket là con trỏ đầu của một DSLK riêng. Các phần tử có cùng h(k) = i được nối kết trong DSLK thứ i.</p>
+      <p class="p"><strong class="bl">Cấu trúc nút:</strong> <code class="c">struct { int Key; Node* Next; }</code>. Khởi tạo: tất cả bucket = NULL.</p>
+    </div>
+    <div>
+      <p class="p"><strong class="gn">Ưu điểm:</strong></p>
+      <ul style="padding-left:16px;font-size:13px">
+        <li>Linh hoạt hơn địa chỉ mở vì mỗi bucket có thể chứa nhiều phần tử bằng DSLK.</li>
+        <li>Xóa phần tử đơn giản hơn Linear Probing vì chỉ cần xóa node trong DSLK.</li>
+        <li>Có thể làm việc khi hệ số tải α = n/m lớn hơn 1.</li>
+        <li>Không bị phân cụm sơ cấp như Linear Probing.</li>
+      </ul>
+      <p class="p" style="margin-top:6px"><strong class="rd">Nhược điểm:</strong> Tốn bộ nhớ cho con trỏ ngoài; không cache-friendly. Nếu hàm băm phân bố kém, nhiều khóa rơi vào cùng một bucket, danh sách liên kết dài ra và thời gian tìm kiếm có thể tăng tới O(n).</p>
+    </div>
+  </div>
+</div>
+
+<div class="exercise-box">
+  <div class="exercise-num">Câu 4a — CLO2: "Phân cụm là gì? Phương pháp nào dễ bị nhất?"</div>
+  <p class="p"><strong class="hl">Phân cụm (Clustering)</strong> là hiện tượng các phần tử va chạm tích tụ thành dãy liên tiếp trong bảng, làm chuỗi tìm kiếm dài ra, tăng chi phí tra cứu.</p>
+  <p class="p"><strong>Phân cụm sơ cấp (Primary Clustering)</strong> — xảy ra với <strong class="rd">Linear Probing</strong>: Khi hai phần tử có cùng h(k), chúng tranh giành cùng ô kế tiếp. Dần dần tạo thành "khối đặc" ngày càng dài. Phần tử mới h(k) = bất kỳ slot nào trong khối đều bị ảnh hưởng.</p>
+  <p class="p"><strong>Phân cụm thứ cấp (Secondary Clustering)</strong> — xảy ra với Quadratic Probing: Các khóa cùng h₁(k) đi theo cùng đường dò → cụm theo đường parabol.</p>
+  <p class="p"><strong class="gn">Giải pháp:</strong> Double Hashing — mỗi khóa có bước dò riêng h₂(k), giúp giảm mạnh phân cụm sơ cấp. Điều kiện cần: h₂(k) ≠ 0 và nên nguyên tố cùng nhau với m.</p>
+</div>
+
+<div class="exercise-box">
+  <div class="exercise-num">Câu 4b — CLO1 (0.25đ × 6 ý): Áp dụng tính h(k) và vẽ bảng</div>
+
+  <div style="margin-bottom:16px">
+  <p class="p" style="font-weight:700;color:var(--yellow)">Bài 4.1 — Chaining: h(k) = k mod 5. Chèn: 12, 29, 13, 15, 27, 34, 7</p>
+  <p class="p"><strong>Bước 1 — Tính h(k) trước:</strong></p>
+  <div style="overflow-x:auto"><table class="cmp-table" style="max-width:600px">
+    <tr><th>k</th><th>12</th><th>29</th><th>13</th><th>15</th><th>27</th><th>34</th><th>7</th></tr>
+    <tr><td><strong>h(k)=k mod 5</strong></td><td class="tl">12%5=<strong style="color:var(--blue)">2</strong></td><td>29%5=<strong style="color:var(--blue)">4</strong></td><td>13%5=<strong style="color:var(--blue)">3</strong></td><td>15%5=<strong style="color:var(--blue)">0</strong></td><td>27%5=<strong style="color:var(--yellow)">2 ✗</strong></td><td>34%5=<strong style="color:var(--yellow)">4 ✗</strong></td><td>7%5=<strong style="color:var(--yellow)">2 ✗</strong></td></tr>
+  </table></div>
+  <p class="p"><strong>Bước 2 — Vẽ bảng:</strong></p>
+  <div class="note" style="margin-top:8px"><b>📌 Quy ước hình vẽ Chaining</b> Trong sơ đồ rút gọn dưới đây, ô bucket được vẽ như node đầu tiên. Khi trình bày chặt chẽ trên giấy thi, nên hiểu bucket là con trỏ Head: <code class="c">bucket[2] → [12] → [27] → [7] → NULL</code>.</div>
+  <div style="display:flex;gap:0;align-items:flex-start;margin-top:8px;flex-wrap:wrap;gap:4px">
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:11px;color:var(--muted);width:18px">0</span>
+        <div style="width:56px;height:36px;border:2px solid var(--bdr2);border-radius:5px;display:flex;align-items:center;justify-content:center;background:var(--s2);font-family:monospace;font-weight:700;font-size:13px;color:var(--green)">15</div>
+        <span style="color:var(--muted);font-size:13px">→</span>
+        <span style="color:var(--dim);font-size:12px;font-family:monospace">NULL</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:11px;color:var(--muted);width:18px">1</span>
+        <div style="width:56px;height:36px;border:2px solid var(--bdr2);border-radius:5px;display:flex;align-items:center;justify-content:center;background:var(--s2);font-family:monospace;font-size:11px;color:var(--dim)">null</div>
+        <span style="color:var(--dim);font-size:13px">→</span>
+        <span style="color:var(--dim);font-size:12px;font-family:monospace">NULL</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:11px;color:var(--muted);width:18px">2</span>
+        <div style="width:56px;height:36px;border:2px solid var(--yellow);border-radius:5px;display:flex;align-items:center;justify-content:center;background:rgba(210,153,34,.1);font-family:monospace;font-weight:700;font-size:13px;color:var(--green)">12</div>
+        <span style="color:var(--green);font-size:13px">→</span>
+        <div style="width:56px;height:36px;border:2px solid var(--yellow);border-radius:5px;display:flex;align-items:center;justify-content:center;background:rgba(210,153,34,.1);font-family:monospace;font-weight:700;font-size:13px;color:var(--green)">27</div>
+        <span style="color:var(--green);font-size:13px">→</span>
+        <div style="width:56px;height:36px;border:2px solid var(--yellow);border-radius:5px;display:flex;align-items:center;justify-content:center;background:rgba(210,153,34,.1);font-family:monospace;font-weight:700;font-size:13px;color:var(--green)">7</div>
+        <span style="color:var(--green);font-size:13px">→</span>
+        <span style="color:var(--dim);font-size:12px;font-family:monospace">NULL</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:11px;color:var(--muted);width:18px">3</span>
+        <div style="width:56px;height:36px;border:2px solid var(--bdr2);border-radius:5px;display:flex;align-items:center;justify-content:center;background:var(--s2);font-family:monospace;font-weight:700;font-size:13px;color:var(--green)">13</div>
+        <span style="color:var(--muted);font-size:13px">→</span>
+        <span style="color:var(--dim);font-size:12px;font-family:monospace">NULL</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:11px;color:var(--muted);width:18px">4</span>
+        <div style="width:56px;height:36px;border:2px solid var(--yellow);border-radius:5px;display:flex;align-items:center;justify-content:center;background:rgba(210,153,34,.1);font-family:monospace;font-weight:700;font-size:13px;color:var(--green)">29</div>
+        <span style="color:var(--green);font-size:13px">→</span>
+        <div style="width:56px;height:36px;border:2px solid var(--yellow);border-radius:5px;display:flex;align-items:center;justify-content:center;background:rgba(210,153,34,.1);font-family:monospace;font-weight:700;font-size:13px;color:var(--green)">34</div>
+        <span style="color:var(--green);font-size:13px">→</span>
+        <span style="color:var(--dim);font-size:12px;font-family:monospace">NULL</span>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <div style="margin-top:20px">
+  <p class="p" style="font-weight:700;color:var(--yellow)">Bài 4.3 — Coalesced: h(k) = k mod 5. Chèn: 12, 22, 15, 27, 7</p>
+  <p class="p"><strong>Bước 1:</strong> 12%5=2, 22%5=2✗, 15%5=0, 27%5=2✗, 7%5=2✗. avail khởi đầu = 4.</p>
+  <div style="overflow-x:auto"><table class="cmp-table" style="max-width:480px">
+    <tr><th>Thứ tự</th><th>k</th><th>h(k)</th><th>Xử lý</th><th>Slot chèn</th><th>Next cập nhật</th></tr>
+    <tr><td>1</td><td>12</td><td>2</td><td class="tl">Slot 2 trống → chèn ngay</td><td class="tl"><span class="tag-g">Slot 2</span></td><td>Next[2]=-1</td></tr>
+    <tr><td>2</td><td>22</td><td>2✗</td><td class="tl">Slot 2 bị chiếm, cuối chuỗi là slot 2 → avail=4 trống</td><td class="tl"><span class="tag-y">Slot 4</span></td><td>Next[2]=4</td></tr>
+    <tr><td>3</td><td>15</td><td>0</td><td class="tl">Slot 0 trống → chèn ngay</td><td class="tl"><span class="tag-g">Slot 0</span></td><td>Next[0]=-1</td></tr>
+    <tr><td>4</td><td>27</td><td>2✗</td><td class="tl">Slot 2 → Next=4 → slot 4 bị → avail=3 trống</td><td class="tl"><span class="tag-y">Slot 3</span></td><td>Next[4]=3</td></tr>
+    <tr><td>5</td><td>7</td><td>2✗</td><td class="tl">Slot 2→4→3 → cả 3 bị → avail=1 trống</td><td class="tl"><span class="tag-y">Slot 1</span></td><td>Next[3]=1</td></tr>
+  </table></div>
+  <div style="overflow-x:auto;margin-top:10px"><table class="cmp-table" style="max-width:300px">
+    <tr><th>Slot</th><th>Key</th><th>Next</th></tr>
+    <tr><td>0</td><td style="color:var(--green)">15</td><td>-1</td></tr>
+    <tr><td>1</td><td style="color:var(--orange)">7</td><td>-1</td></tr>
+    <tr><td>2</td><td style="color:var(--green)">12</td><td style="color:var(--orange)">4</td></tr>
+    <tr><td>3</td><td style="color:var(--orange)">27</td><td style="color:var(--orange)">1</td></tr>
+    <tr><td>4</td><td style="color:var(--orange)">22</td><td style="color:var(--orange)">3</td></tr>
+  </table></div>
+  </div>
+
+  <div style="margin-top:20px">
+  <p class="p" style="font-weight:700;color:var(--yellow)">Bài 4.2 — Linear Probing: h(k) = k mod 7. Chèn: 10, 17, 24, 3, 31</p>
+  <p class="p"><strong>Bước 1:</strong> Tất cả h(k) = 3! h(10)=3, h(17)=3, h(24)=3, h(3)=3, h(31)=3.</p>
+  <div style="overflow-x:auto"><table class="cmp-table" style="max-width:520px">
+    <tr><th>k</th><th>h₀</th><th>Slot 1</th><th>Slot 2</th><th>Slot 3</th><th>Slot 4</th><th>Kết quả</th></tr>
+    <tr><td>10</td><td>3</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="tag-g">Slot 3</span></td></tr>
+    <tr><td>17</td><td>3✗</td><td>(3+1)%7=4</td><td>—</td><td>—</td><td>—</td><td><span class="tag-g">Slot 4</span></td></tr>
+    <tr><td>24</td><td>3✗</td><td>4✗</td><td>(3+2)%7=5</td><td>—</td><td>—</td><td><span class="tag-g">Slot 5</span></td></tr>
+    <tr><td>3</td><td>3✗</td><td>4✗</td><td>5✗</td><td>(3+3)%7=6</td><td>—</td><td><span class="tag-g">Slot 6</span></td></tr>
+    <tr><td>31</td><td>3✗</td><td>4✗</td><td>5✗</td><td>6✗</td><td>(3+4)%7=0</td><td><span class="tag-g">Slot 0</span></td></tr>
+  </table></div>
+  <div class="warn" style="margin-top:8px"><b>⚠ Ghi chú quan trọng khi vẽ:</b> Slot 0 được dùng dù h(31)=3. Lý do: sau khi dò hết 4 slot (4,5,6 bị chiếm), công thức (3+4)%7=0 → slot 0 trống → chèn vào. Đây là ví dụ điển hình phân cụm sơ cấp.</div>
+  </div>
+
+  <div style="margin-top:20px">
+  <p class="p" style="font-weight:700;color:var(--yellow)">Bài 4.7 — Double Hashing: h₁(k)=k mod 7, h₂(k)=5−(k mod 5). Chèn: 10, 17, 24, 31, 38</p>
+  <div style="overflow-x:auto"><table class="cmp-table" style="max-width:580px">
+    <tr><th>k</th><th>h₁(k)</th><th>h₂(k)</th><th>i=0</th><th>i=1: (h₁+h₂)%m</th><th>Kết quả</th></tr>
+    <tr><td>10</td><td>3</td><td>5−0=5</td><td>Slot 3 trống</td><td>—</td><td><span class="tag-g">Slot 3</span></td></tr>
+    <tr><td>17</td><td>3✗</td><td>5−2=3</td><td>Slot 3 bị</td><td>(3+3)%7=6</td><td><span class="tag-g">Slot 6</span></td></tr>
+    <tr><td>24</td><td>3✗</td><td>5−4=1</td><td>Slot 3 bị</td><td>(3+1)%7=4</td><td><span class="tag-g">Slot 4</span></td></tr>
+    <tr><td>31</td><td>3✗</td><td>5−1=4</td><td>Slot 3 bị</td><td>(3+4)%7=0</td><td><span class="tag-g">Slot 0</span></td></tr>
+    <tr><td>38</td><td>3✗</td><td>5−3=2</td><td>Slot 3 bị</td><td>(3+2)%7=5</td><td><span class="tag-g">Slot 5</span></td></tr>
+  </table></div>
+  <div class="note" style="margin-top:8px"><b>✅ Kết quả:</b> Slot: 0→31, 3→10, 4→24, 5→38, 6→17. Mặc dù tất cả h₁(k)=3, các khóa được phân tán ra 5 slot khác nhau nhờ bước dò h₂(k); đây là ví dụ giảm phân cụm sơ cấp so với Linear Probing!</div>
+  </div>
+
+</div>
+
+</div><!-- exercises -->
+
+<div style="text-align:center;color:var(--dim);font-size:12px;margin-top:40px;padding-top:20px;border-top:1px solid var(--bdr)">
+  Tài liệu theo Chương 6 — GT CTDL&GT Thầy Trần Văn Thọ (2019) · Simulation built for exam practice
+</div>
+
+</div><!-- wrap -->
+
+<script>
+// ================================================================
+// UTILITY
+// ================================================================
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+function logMsg(id,cls,txt){
+  const el=document.getElementById(id);
+  if(!el)return;
+  const d=document.createElement('div');
+  d.className=cls;d.innerHTML=txt;
+  el.appendChild(d);el.scrollTop=el.scrollHeight;
+}
+function setStep(id,icon,txt,num){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.innerHTML=`<span class="step-icon">${icon}</span><span class="step-text">${num?`<span class="step-num-badge">Bước ${num}</span> `:''}${txt}</span>`;
+}
+function renderQueue(id,keys,current){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.innerHTML=keys.map((k,i)=>{
+    let cls='key-chip';
+    if(i<current)cls+=' done';
+    else if(i===current)cls+=' current';
+    return `<div class="${cls}">${k}</div>`;
+  }).join('');
+}
+function getSpeed(id){return parseInt(document.getElementById(id)?.value||800)}
+
+// ================================================================
+// SIMULATOR 1: CHAINING
+// ================================================================
+let chainState={m:5,keys:[],table:[],step:0,running:false};
+
+function chainPreset(m,keys){
+  document.getElementById('chain-m').value=m;
+  document.getElementById('chain-keys').value=keys;
+  chainReset();
+}
+function chainReset(){
+  chainState.running=false;
+  const m=parseInt(document.getElementById('chain-m').value)||5;
+  const raw=document.getElementById('chain-keys').value;
+  const keys=raw.split(',').map(s=>parseInt(s.trim())).filter(n=>!isNaN(n));
+  chainState={m,keys,table:Array.from({length:m},()=>[]),step:0,running:false};
+  document.getElementById('chain-formula').textContent=`h(k) = k mod ${m}`;
+  document.getElementById('chain-current').textContent='—';
+  document.getElementById('chain-hk').textContent='—';
+  document.getElementById('chain-log').innerHTML='';
+  setStep('chain-step-msg','💡','Nhấn "Thêm 1 bước" để chèn phần tử đầu tiên.',null);
+  renderQueue('chain-queue',keys,-1);
+  renderChain();
+}
+
+function renderChain(){
+  const {m,table}=chainState;
+  const vis=document.getElementById('chain-visual');
+  if(!vis)return;
+  let html='<div style="display:flex;flex-direction:column;gap:5px;margin-top:8px">';
+  for(let i=0;i<m;i++){
+    const bkt=table[i];
+    html+=`<div class="bucket-row">`;
+    html+=`<span class="bucket-idx">${i}</span>`;
+    html+=`<div class="bucket-cell ${bkt.length===0?'empty':bkt._highlight?'highlight':'occupied'}" id="bucket-${i}">${bkt.length===0?'—':''}</div>`;
+    if(bkt.length>0){
+      bkt.forEach((node,ni)=>{
+        html+=`<div class="arrow-right ${ni<bkt.length-1?'green':''}"></div>`;
+        html+=`<div class="chain-node ${node._new?'new-node':''}">${node.val}</div>`;
+      });
+    }
+    html+=`<div class="arrow-right"></div><span class="arrow-null">NULL</span>`;
+    html+=`</div>`;
+  }
+  html+='</div>';
+  vis.innerHTML=html;
+}
+
+async function chainStep(){
+  if(chainState.running)return;
+  const {m,keys,table}=chainState;
+  if(chainState.step>=keys.length){
+    setStep('chain-step-msg','✅','Đã chèn hết tất cả phần tử!',null);
+    return;
+  }
+  chainState.running=true;
+  const k=keys[chainState.step];
+  const h=((k%m)+m)%m;
+  document.getElementById('chain-current').textContent=k;
+  document.getElementById('chain-hk').textContent=h;
+  renderQueue('chain-queue',keys,chainState.step);
+
+  // highlight bucket
+  table[h]._highlight=true;
+  renderChain();
+
+  if(table[h].length===0){
+    await sleep(400);
+    setStep('chain-step-msg','➕',`h(${k}) = ${k} mod ${m} = <strong style="color:var(--green)">${h}</strong>. Bucket ${h} <strong class="gn">trống</strong> → chèn ngay.`,chainState.step+1);
+    logMsg('chain-log','ok',`✅ Chèn ${k} vào bucket ${h} (không va chạm)`);
+  } else {
+    await sleep(300);
+    setStep('chain-step-msg','⚠️',`h(${k}) = ${k} mod ${m} = <strong style="color:var(--yellow)">${h}</strong>. Bucket ${h} <strong class="hl">đã có ${table[h].length} phần tử</strong> → <strong>va chạm!</strong> Nối vào cuối DSLK.`,chainState.step+1);
+    logMsg('chain-log','collision',`⚡ Va chạm tại bucket ${h} khi chèn ${k} — thêm vào cuối chuỗi`);
+  }
+  await sleep(500);
+
+  // clear highlight, mark new node
+  table[h].forEach(n=>n._new=false);
+  table[h]._highlight=false;
+  table[h].push({val:k,_new:true});
+  renderChain();
+
+  await sleep(600);
+  table[h].forEach(n=>n._new=false);
+  renderChain();
+
+  chainState.step++;
+  renderQueue('chain-queue',keys,chainState.step);
+  if(chainState.step>=keys.length){
+    setStep('chain-step-msg','🏁','Hoàn thành! Tất cả phần tử đã được chèn.',null);
+    logMsg('chain-log','ok','🏁 Hoàn thành chèn tất cả phần tử');
+    // show stats
+    const maxLen=Math.max(...table.map(b=>b.length));
+    logMsg('chain-log','step',`📊 Bucket dài nhất: ${maxLen} phần tử. Hệ số tải α = ${keys.length}/${m} = ${(keys.length/m).toFixed(2)}`);
+  }
+  chainState.running=false;
+}
+
+async function chainAuto(){
+  if(chainState.running)return;
+  while(chainState.step<chainState.keys.length){
+    await chainStep();
+    if(chainState.step<chainState.keys.length)
+      await sleep(getSpeed('chain-speed'));
+  }
+}
+
+// ================================================================
+// SIMULATOR 2: LINEAR PROBING
+// ================================================================
+let lpState={m:7,keys:[],table:[],step:0,running:false,probeCount:0};
+
+function lpPreset(m,keys){
+  document.getElementById('lp-m').value=m;
+  document.getElementById('lp-keys').value=keys;
+  lpReset();
+}
+function lpReset(){
+  lpState.running=false;
+  const m=parseInt(document.getElementById('lp-m').value)||7;
+  const raw=document.getElementById('lp-keys').value;
+  const keys=raw.split(',').map(s=>parseInt(s.trim())).filter(n=>!isNaN(n));
+  lpState={m,keys,table:Array(m).fill(null).map(()=>({val:null,state:'empty'})),step:0,running:false,probeCount:0};
+  document.getElementById('lp-formula').textContent=`h(k) = k mod ${m}`;
+  document.getElementById('lp-current').textContent='—';
+  document.getElementById('lp-hk').textContent='—';
+  document.getElementById('lp-probes').textContent='0';
+  document.getElementById('lp-log').innerHTML='';
+  setStep('lp-step-msg','💡','Nhấn "Thêm 1 bước" để bắt đầu.',null);
+  renderQueue('lp-queue',keys,-1);
+  renderLP();
+}
+
+function renderLP(){
+  const {m,table}=lpState;
+  const vis=document.getElementById('lp-visual');
+  if(!vis)return;
+  let html='<div class="flat-table">';
+  for(let i=0;i<m;i++){
+    const cell=table[i];
+    let cls='flat-cell';
+    if(cell.state==='empty')cls+=' empty';
+    else if(cell.state==='active')cls+=' active';
+    else if(cell.state==='occupied')cls+=' occupied';
+    else if(cell.state==='collision')cls+=' collision-cell';
+    else if(cell.state==='probe')cls+=' probe-cell';
+    else if(cell.state==='new')cls+=' new-cell occupied';
+    html+=`<div class="${cls}" id="lp-cell-${i}">`;
+    html+=`<span class="idx-label">[${i}]</span>`;
+    html+=`<span class="key-val">${cell.val===null?'—':cell.val}</span>`;
+    html+=`</div>`;
+  }
+  html+='</div>';
+  vis.innerHTML=html;
+}
+
+async function lpStep(){
+  if(lpState.running)return;
+  const {m,keys,table}=lpState;
+  if(lpState.step>=keys.length){
+    setStep('lp-step-msg','✅','Đã chèn hết!',null);
+    return;
+  }
+  lpState.running=true;
+  const k=keys[lpState.step];
+  const h0=((k%m)+m)%m;
+  document.getElementById('lp-current').textContent=k;
+  document.getElementById('lp-hk').textContent=h0;
+  renderQueue('lp-queue',keys,lpState.step);
+
+  // Reset all states (except occupied)
+  table.forEach(c=>{if(c.state!=='occupied')c.state='empty'});
+
+  let probes=0;
+  let slot=h0;
+  table[slot].state='active';
+  renderLP();
+  await sleep(350);
+
+  if(table[slot].val===null){
+    setStep('lp-step-msg','➕',`h(${k}) = ${k} mod ${m} = <span style="color:var(--green)">${h0}</span> → Slot ${h0} <strong class="gn">trống</strong> → Chèn ngay!`,lpState.step+1);
+    logMsg('lp-log','ok',`✅ [${k}] → h=${h0}, slot ${h0} trống → chèn ngay (0 lần dò thêm)`);
+    table[slot].val=k;table[slot].state='new';
+    renderLP();
+    await sleep(400);
+    table[slot].state='occupied';
+    renderLP();
+  } else {
+    // collision loop
+    let collisions=[];
+    while(table[slot].val!==null){
+      table[slot].state='collision';
+      collisions.push(slot);
+      probes++;
+      const nextSlot=(slot+1)%m;
+      setStep('lp-step-msg','🔄',`h(${k})=${h0} → Slot ${slot} <strong class="hl">bị chiếm (${table[slot].val})</strong>! Dò sang slot ${nextSlot}...`,lpState.step+1);
+      logMsg('lp-log','collision',`⚡ Slot ${slot} bị chiếm (${table[slot].val}) → dò slot ${nextSlot}`);
+      renderLP();
+      await sleep(450);
+      slot=nextSlot;
+      table[slot].state='probe';
+      renderLP();
+      await sleep(350);
+    }
+    setStep('lp-step-msg','✅',`Slot <strong class="gn">${slot}</strong> trống! Chèn <strong>${k}</strong> vào slot ${slot} (sau ${probes} lần dò).`,lpState.step+1);
+    logMsg('lp-log','ok',`✅ [${k}] chèn vào slot ${slot} (dò ${probes} lần từ h=${h0})`);
+    if(probes>3)logMsg('lp-log','collision',`   ⚠ Phân cụm! Chuỗi bị chiếm: ${collisions.join('→')}→${slot}`);
+    table[slot].val=k;table[slot].state='new';
+    renderLP();
+    await sleep(400);
+    table[slot].state='occupied';
+    // revert collision cells to occupied state
+    collisions.forEach(s=>{table[s].state='occupied'});
+    renderLP();
+  }
+
+  document.getElementById('lp-probes').textContent=probes;
+  lpState.step++;
+  renderQueue('lp-queue',keys,lpState.step);
+  if(lpState.step>=keys.length){
+    setStep('lp-step-msg','🏁','Hoàn thành! Xem bảng kết quả bên trên.',null);
+    logMsg('lp-log','ok','🏁 Chèn hoàn thành tất cả phần tử');
+  }
+  lpState.running=false;
+}
+
+async function lpAuto(){
+  if(lpState.running)return;
+  while(lpState.step<lpState.keys.length){
+    await lpStep();
+    if(lpState.step<lpState.keys.length)await sleep(getSpeed('lp-speed'));
+  }
+}
+
+// ================================================================
+// SIMULATOR 3: COALESCED
+// ================================================================
+let coalState={m:5,keys:[],table:[],step:0,running:false,avail:4};
+
+function coalPreset(m,keys){
+  document.getElementById('coal-m').value=m;
+  document.getElementById('coal-keys').value=keys;
+  coalReset();
+}
+function coalReset(){
+  coalState.running=false;
+  const m=parseInt(document.getElementById('coal-m').value)||5;
+  const raw=document.getElementById('coal-keys').value;
+  const keys=raw.split(',').map(s=>parseInt(s.trim())).filter(n=>!isNaN(n));
+  coalState={
+    m,keys,
+    table:Array(m).fill(null).map(()=>({val:null,next:-1,state:'empty'})),
+    step:0,running:false,avail:m-1
+  };
+  document.getElementById('coal-formula').textContent=`h(k) = k mod ${m}`;
+  document.getElementById('coal-current').textContent='—';
+  document.getElementById('coal-avail').textContent=m-1;
+  document.getElementById('coal-log').innerHTML='';
+  setStep('coal-step-msg','💡','Nhấn "Thêm 1 bước" để bắt đầu.',null);
+  renderQueue('coal-queue',keys,-1);
+  renderCoal();
+}
+
+function renderCoal(){
+  const {m,table}=coalState;
+  const vis=document.getElementById('coal-visual');
+  if(!vis)return;
+  let html='<div class="flat-table">';
+  for(let i=0;i<m;i++){
+    const cell=table[i];
+    let cls='flat-cell';
+    if(cell.state==='empty')cls+=' empty';
+    else if(cell.state==='active')cls+=' active';
+    else if(cell.state==='occupied')cls+=' occupied';
+    else if(cell.state==='chain')cls+=' chain-link occupied';
+    else if(cell.state==='new')cls+=' new-cell';
+    else if(cell.state==='new-chain')cls+=' new-cell chain-link';
+    html+=`<div class="${cls}" id="coal-cell-${i}">`;
+    html+=`<span class="idx-label">[${i}]</span>`;
+    html+=`<span class="key-val">${cell.val===null?'—':cell.val}</span>`;
+    html+=`<span class="next-val">Next:${cell.next}</span>`;
+    html+=`</div>`;
+  }
+  html+='</div>';
+
+  // Draw chain arrows (text-based)
+  html+='<div style="font-size:12px;color:var(--muted);margin-top:8px;font-family:monospace">';
+  // find chains
+  for(let i=0;i<m;i++){
+    if(table[i].val!==null&&table[i].next!==-1){
+      let chain=[i];
+      let cur=table[i].next;
+      while(cur!==-1&&chain.length<20){chain.push(cur);cur=table[cur].next;}
+      html+=`<div>Chuỗi bucket ${i}: ${chain.map((s,idx)=>`<span style="color:${idx===0?'var(--green)':'var(--orange)'}">[${s}]${table[s].val}</span>`).join(' → ')} → NULL</div>`;
+    }
+  }
+  html+='</div>';
+
+  vis.innerHTML=html;
+}
+
+async function coalStep(){
+  if(coalState.running)return;
+  const {m,keys,table}=coalState;
+  if(coalState.step>=keys.length){setStep('coal-step-msg','✅','Hoàn thành!',null);return;}
+  coalState.running=true;
+  const k=keys[coalState.step];
+  const h=((k%m)+m)%m;
+  document.getElementById('coal-current').textContent=k;
+  renderQueue('coal-queue',keys,coalState.step);
+
+  table.forEach(c=>{if(c.state==='active')c.state=c.val?'occupied':'empty'});
+
+  setStep('coal-step-msg','🔑',`Tính h(${k}) = ${k} mod ${m} = <strong style="color:var(--blue)">${h}</strong>. Xét slot ${h}...`,coalState.step+1);
+  table[h].state='active';
+  renderCoal();
+  await sleep(500);
+
+  if(table[h].val===null){
+    // Direct insert
+    table[h].val=k;table[h].next=-1;table[h].state='new';
+    setStep('coal-step-msg','➕',`Slot ${h} <strong class="gn">trống</strong> → chèn <strong>${k}</strong> trực tiếp vào slot ${h}.`,coalState.step+1);
+    logMsg('coal-log','ok',`✅ [${k}] → h=${h}, slot ${h} trống → chèn trực tiếp`);
+    renderCoal();
+    await sleep(500);
+    table[h].state='occupied';
+    renderCoal();
+  } else {
+    // Follow chain
+    logMsg('coal-log','collision',`⚡ Va chạm tại slot ${h} (chứa ${table[h].val})`);
+    let cur=h;
+    let chainPath=[h];
+    while(table[cur].next!==-1){
+      setStep('coal-step-msg','🔗',`Slot ${cur} Next=${table[cur].next} → đi tiếp theo chuỗi...`,coalState.step+1);
+      cur=table[cur].next;
+      chainPath.push(cur);
+      table[cur].state='active';
+      renderCoal();
+      await sleep(400);
+    }
+    setStep('coal-step-msg','📍',`Đến cuối chuỗi tại slot ${cur} (Next=-1). Tìm ô trống từ avail=${coalState.avail} ngược lên...`,coalState.step+1);
+    await sleep(500);
+
+    // Find empty slot from avail downward
+    while(coalState.avail>=0&&table[coalState.avail].val!==null) coalState.avail--;
+    const emptySlot=coalState.avail;
+    document.getElementById('coal-avail').textContent=emptySlot;
+
+    if(emptySlot<0){
+      setStep('coal-step-msg','❌','Bảng đầy! Không chèn được.',null);
+      logMsg('coal-log','error','❌ Bảng đầy');
+      coalState.running=false; return;
+    }
+
+    setStep('coal-step-msg','✅',`Ô trống: slot ${emptySlot}. Chèn <strong>${k}</strong> vào slot ${emptySlot}. Cập nhật Next[${cur}] = ${emptySlot}.`,coalState.step+1);
+    logMsg('coal-log','probe',`→ Cuối chuỗi tại slot ${cur} → ô trống tại slot ${emptySlot} → Next[${cur}]=${emptySlot}`);
+    logMsg('coal-log','ok',`✅ [${k}] chèn vào slot ${emptySlot}`);
+
+    table[cur].next=emptySlot;
+    table[cur].state=chainPath.indexOf(cur)===0?'occupied':'chain';
+    table[emptySlot].val=k;table[emptySlot].next=-1;table[emptySlot].state='new-chain';
+
+    // fix chain states
+    chainPath.forEach(s=>{if(table[s].next!==-1)table[s].state='chain';else table[s].state='occupied'});
+    renderCoal();
+    await sleep(600);
+    table[emptySlot].state='chain';
+    renderCoal();
+    coalState.avail--;
+  }
+  coalState.step++;
+  renderQueue('coal-queue',keys,coalState.step);
+  if(coalState.step>=keys.length){
+    setStep('coal-step-msg','🏁','Hoàn thành! Xem bảng kết quả và chuỗi bên trên.',null);
+    logMsg('coal-log','ok','🏁 Chèn hoàn thành tất cả phần tử');
+  }
+  document.getElementById('coal-avail').textContent=coalState.avail;
+  coalState.running=false;
+}
+
+async function coalAuto(){
+  if(coalState.running)return;
+  while(coalState.step<coalState.keys.length){
+    await coalStep();
+    if(coalState.step<coalState.keys.length)await sleep(getSpeed('coal-speed'));
+  }
+}
+
+// ================================================================
+// SIMULATOR 4: DOUBLE HASHING
+// ================================================================
+let dhState={m:7,m1:7,p:5,keys:[],table:[],step:0,running:false};
+
+function dhPreset(m,m1,p,keys){
+  document.getElementById('dh-m').value=m;
+  document.getElementById('dh-m1').value=m1;
+  document.getElementById('dh-p').value=p;
+  document.getElementById('dh-keys').value=keys;
+  dhReset();
+}
+function dhReset(){
+  dhState.running=false;
+  const m=parseInt(document.getElementById('dh-m').value)||7;
+  const m1=parseInt(document.getElementById('dh-m1').value)||7;
+  const p=parseInt(document.getElementById('dh-p').value)||5;
+  const raw=document.getElementById('dh-keys').value;
+  const keys=raw.split(',').map(s=>parseInt(s.trim())).filter(n=>!isNaN(n));
+  dhState={m,m1,p,keys,table:Array(m).fill(null).map(()=>({val:null,state:'empty'})),step:0,running:false};
+  document.getElementById('dh-f1').textContent=`k mod ${m1}`;
+  document.getElementById('dh-f2').textContent=`${p}−(k mod ${p})`;
+  document.getElementById('dh-current').textContent='—';
+  document.getElementById('dh-h1').textContent='—';
+  document.getElementById('dh-h2').textContent='—';
+  document.getElementById('dh-log').innerHTML='';
+  setStep('dh-step-msg','💡','Nhấn Reset để bắt đầu.',null);
+  renderQueue('dh-queue',keys,-1);
+  renderDH();
+}
+
+function renderDH(){
+  const {m,table}=dhState;
+  const vis=document.getElementById('dh-visual');
+  if(!vis)return;
+  let html='<div class="flat-table">';
+  for(let i=0;i<m;i++){
+    const cell=table[i];
+    let cls='flat-cell';
+    if(cell.state==='empty')cls+=' empty';
+    else if(cell.state==='active')cls+=' active';
+    else if(cell.state==='occupied')cls+=' occupied';
+    else if(cell.state==='collision')cls+=' collision-cell';
+    else if(cell.state==='probe')cls+=' probe-cell';
+    else if(cell.state==='new')cls+=' new-cell';
+    html+=`<div class="${cls}">`;
+    html+=`<span class="idx-label">[${i}]</span>`;
+    html+=`<span class="key-val">${cell.val===null?'—':cell.val}</span>`;
+    html+=`</div>`;
+  }
+  html+='</div>';
+  vis.innerHTML=html;
+}
+
+async function dhStep(){
+  if(dhState.running)return;
+  const {m,m1,p,keys,table}=dhState;
+  if(dhState.step>=keys.length){setStep('dh-step-msg','✅','Hoàn thành!',null);return;}
+  dhState.running=true;
+  const k=keys[dhState.step];
+  const h1=((k%m1)+m1)%m1;
+  const h2=p-(((k%p)+p)%p)||p;
+  document.getElementById('dh-current').textContent=k;
+  document.getElementById('dh-h1').textContent=h1;
+  document.getElementById('dh-h2').textContent=h2;
+  renderQueue('dh-queue',keys,dhState.step);
+
+  table.forEach(c=>{if(c.state!=='occupied')c.state='empty'});
+
+  let i=0,slot=((h1+i*h2)%m+m)%m;
+  table[slot].state='active';
+  renderDH();
+  await sleep(350);
+
+  if(table[slot].val===null){
+    setStep('dh-step-msg','➕',`h₁(${k})=${h1}, h₂(${k})=${h2}. Slot ${h1} <strong class="gn">trống</strong> → chèn ngay!`,dhState.step+1);
+    logMsg('dh-log','ok',`✅ [${k}] → h₁=${h1}, h₂=${h2}, chèn vào slot ${h1}`);
+    table[slot].val=k;table[slot].state='new';renderDH();
+    await sleep(400);table[slot].state='occupied';renderDH();
+  } else {
+    let probeSlots=[slot];
+    while(table[slot].val!==null){
+      table[slot].state='collision';
+      i++;
+      const next=((h1+i*h2)%m+m)%m;
+      setStep('dh-step-msg','🔄',`Slot ${slot} bị chiếm → dò i=${i}: (${h1}+${i}×${h2}) mod ${m} = <strong style="color:var(--purple)">${next}</strong>`,dhState.step+1);
+      logMsg('dh-log','probe',`  Dò i=${i}: (${h1}+${i}×${h2}) mod ${m} = slot ${next}`);
+      renderDH();
+      await sleep(400);
+      slot=next;
+      if(!probeSlots.includes(slot)){
+        table[slot].state='probe';
+        renderDH();
+        await sleep(300);
+      }
+      probeSlots.push(slot);
+      if(i>m){logMsg('dh-log','error','❌ Bảng đầy!');break;}
+    }
+    setStep('dh-step-msg','✅',`Slot <strong class="gn">${slot}</strong> trống! Chèn <strong>${k}</strong> (sau ${i} lần dò).`,dhState.step+1);
+    logMsg('dh-log','ok',`✅ [${k}] chèn slot ${slot} (i=${i})`);
+    table[slot].val=k;table[slot].state='new';
+    probeSlots.slice(0,-1).forEach(s=>table[s].state='occupied');
+    renderDH();await sleep(400);table[slot].state='occupied';renderDH();
+  }
+  dhState.step++;
+  renderQueue('dh-queue',keys,dhState.step);
+  if(dhState.step>=keys.length)setStep('dh-step-msg','🏁','Hoàn thành! Double Hashing đã phân tán khóa theo bước dò riêng, giúp giảm phân cụm sơ cấp.',null);
+  dhState.running=false;
+}
+
+async function dhAuto(){
+  if(dhState.running)return;
+  while(dhState.step<dhState.keys.length){
+    await dhStep();
+    if(dhState.step<dhState.keys.length)await sleep(900);
+  }
+}
+
+// ================================================================
+// INIT
+// ================================================================
+window.addEventListener('load',()=>{
+  chainReset();lpReset();coalReset();dhReset();
+});
+
+// Active nav
+document.addEventListener('scroll',()=>{
+  const sections=['theory','chaining-sim','linear-sim','coalesced-sim','double-sim','paper-exam','exercises'];
+  const links=document.querySelectorAll('.navlink');
+  sections.forEach((s,i)=>{
+    const el=document.getElementById(s);
+    if(!el)return;
+    const rect=el.getBoundingClientRect();
+    if(rect.top<=80&&rect.bottom>0){
+      links.forEach(l=>l.classList.remove('active'));
+      if(links[i])links[i].classList.add('active');
+    }
+  });
+});
+</script>
+</body>
+</html>
